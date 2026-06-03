@@ -105,4 +105,4 @@ django_settings_module = "tests.settings"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
 testpaths = ["tests"]
-addopts = "--cov=django_rustfs --cov-report=term-missing --cov-fail-under=80"
+addopts = "--cov=django_rustfs --cov-report=term-missing --cov-fail-under=90"

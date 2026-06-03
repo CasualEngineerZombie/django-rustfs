@@ -331,6 +331,65 @@ class TestRustFSStorageOperations:
         with pytest.raises(NotImplementedError):
             storage.path("test.txt")
 
+    def test_size_raises_on_error(self, storage):
+        """Test size() raises RustFSError on failure."""
+        error = ClientError(
+            {"Error": {"Code": "500", "Message": "Internal Error"}},
+            "HeadObject",
+        )
+        storage.client.head_object.side_effect = error
+        with pytest.raises(RustFSError):
+            storage.size("photo.jpg")
+
+    def test_url_presigned_raises_on_error(self, storage):
+        """Test url() raises RustFSError when presign fails."""
+        storage.presign_urls = True
+        storage.default_acl = "private"
+        storage.custom_domain = ""
+        error = ClientError(
+            {"Error": {"Code": "500", "Message": "Internal Error"}},
+            "GetObject",
+        )
+        storage.client.generate_presigned_url.side_effect = error
+        with pytest.raises(RustFSError):
+            storage.url("photo.jpg")
+
+    def test_get_available_name_with_overwrite(self, storage):
+        """Test get_available_name when file_overwrite is True."""
+        storage.file_overwrite = True
+        result = storage.get_available_name("photo.jpg")
+        assert result == "photo.jpg"
+
+    def test_get_object_metadata_raises_on_error(self, storage):
+        """Test get_object_metadata raises RustFSError on failure."""
+        error = ClientError(
+            {"Error": {"Code": "404", "Message": "Not Found"}},
+            "HeadObject",
+        )
+        storage.client.head_object.side_effect = error
+        with pytest.raises(RustFSError):
+            storage.get_object_metadata("photo.jpg")
+
+    def test_copy_object_raises_on_error(self, storage):
+        """Test copy_object raises RustFSError on failure."""
+        error = ClientError(
+            {"Error": {"Code": "500", "Message": "Internal Error"}},
+            "CopyObject",
+        )
+        storage.client.copy_object.side_effect = error
+        with pytest.raises(RustFSError):
+            storage.copy_object("source.txt", "dest.txt")
+
+    def test_get_presigned_post_url_raises_on_error(self, storage):
+        """Test get_presigned_post_url raises RustFSError on failure."""
+        error = ClientError(
+            {"Error": {"Code": "500", "Message": "Internal Error"}},
+            "GeneratePresignedPost",
+        )
+        storage.client.generate_presigned_post.side_effect = error
+        with pytest.raises(RustFSError):
+            storage.get_presigned_post_url("uploads/file.jpg")
+
 
 class TestRustFSStaticStorage:
     """Test RustFSStaticStorage specific behavior."""
@@ -360,6 +419,19 @@ class TestRustFSStaticStorage:
             # Should be a direct URL, not call generate_presigned_url
             storage.client.generate_presigned_url.assert_not_called()
             assert "css/style.css" in url
+
+    def test_static_url_with_custom_domain(self):
+        """Test RustFSStaticStorage.url with custom domain."""
+        with patch.object(RustFSStaticStorage, "_validate_config"):
+            storage = RustFSStaticStorage(
+                endpoint_url="http://localhost:9000",
+                access_key="test",
+                secret_key="test",
+                custom_domain="cdn.example.com",
+                secure_urls=True,
+            )
+            url = storage.url("css/style.css")
+            assert url == "https://cdn.example.com/static/css/style.css"
 
 
 class TestIntegrationWithMoto:
@@ -437,3 +509,108 @@ class TestIntegrationWithMoto:
         assert "folder1" in dirs
         assert "file1.txt" in files
         assert "file2.jpg" in files
+
+    def test_client_property_creates_boto3_client(self):
+        """Test that client property creates a real boto3 client."""
+        storage = RustFSStorage(
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        # Access client property - should create boto3 client
+        client = storage.client
+        assert client is not None
+        assert storage._client is not None
+
+    def test_ensure_bucket_exists(self):
+        """Test _ensure_bucket when bucket already exists."""
+        storage = RustFSStorage(
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage._client = MagicMock()
+        storage._bucket_exists = False
+        storage.client.head_bucket.return_value = {}
+
+        storage._ensure_bucket()
+        assert storage._bucket_exists is True
+        storage.client.head_bucket.assert_called_once_with(
+            Bucket=storage.bucket_name
+        )
+
+    def test_ensure_bucket_creates_when_missing(self):
+        """Test _ensure_bucket creates bucket when it doesn't exist."""
+        storage = RustFSStorage(
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage._client = MagicMock()
+        storage._bucket_exists = False
+        error = ClientError(
+            {"Error": {"Code": "404", "Message": "Not Found"}},
+            "HeadBucket",
+        )
+        storage.client.head_bucket.side_effect = error
+        storage.client.create_bucket.return_value = {}
+
+        storage._ensure_bucket()
+        assert storage._bucket_exists is True
+        storage.client.create_bucket.assert_called_once_with(
+            Bucket=storage.bucket_name
+        )
+
+    def test_ensure_bucket_create_fails(self):
+        """Test _ensure_bucket raises when create fails."""
+        from django_rustfs.storage import RustFSBucketError
+
+        storage = RustFSStorage(
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage._client = MagicMock()
+        storage._bucket_exists = False
+        head_error = ClientError(
+            {"Error": {"Code": "404", "Message": "Not Found"}},
+            "HeadBucket",
+        )
+        storage.client.head_bucket.side_effect = head_error
+        create_error = ClientError(
+            {"Error": {"Code": "500", "Message": "Internal Error"}},
+            "CreateBucket",
+        )
+        storage.client.create_bucket.side_effect = create_error
+
+        with pytest.raises(RustFSBucketError) as exc_info:
+            storage._ensure_bucket()
+
+        assert "Failed to create bucket" in str(exc_info.value)
+
+    def test_ensure_bucket_other_error(self):
+        """Test _ensure_bucket raises on non-404 head_bucket error."""
+        from django_rustfs.storage import RustFSBucketError
+
+        storage = RustFSStorage(
+            endpoint_url="http://localhost:9000",
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage._client = MagicMock()
+        storage._bucket_exists = False
+        error = ClientError(
+            {"Error": {"Code": "403", "Message": "Access Denied"}},
+            "HeadBucket",
+        )
+        storage.client.head_bucket.side_effect = error
+
+        with pytest.raises(RustFSBucketError) as exc_info:
+            storage._ensure_bucket()
+
+        assert "Failed to check bucket" in str(exc_info.value)
