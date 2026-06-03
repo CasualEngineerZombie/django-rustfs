@@ -382,7 +382,7 @@ django-rustfs uses **boto3** to communicate with RustFS. RustFS is fully S3-comp
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) file.
+Apache 2.0 License — see [LICENSE](LICENSE) file.
 
 ---
 
