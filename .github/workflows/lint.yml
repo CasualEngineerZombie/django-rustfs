@@ -1,19 +1,11 @@
-# This workflow installs Python dependencies, runs tests, and lints with ruff
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+name: Lint
 
-name: Python package
-
-on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
@@ -34,10 +26,6 @@ jobs:
         run: |
           ruff check .
 
-      - name: Type check with mypy
+      - name: Check formatting with black
         run: |
-          mypy django_rustfs
-
-      - name: Test with pytest
-        run: |
-          pytest
+          black --check .

@@ -371,13 +371,13 @@ class RustFSStorage(Storage):
             response = self.client.head_object(
                 Bucket=self.bucket_name, Key=key
             )
-            return response["ContentLength"]
+            return int(response["ContentLength"])
         except ClientError as e:
             raise RustFSError(
                 f"Failed to get size of '{name}': {e}"
             ) from e
 
-    def url(self, name: str) -> str:
+    def url(self, name: str | None) -> str:
         """
         Get the URL for a file.
 
@@ -390,6 +390,8 @@ class RustFSStorage(Storage):
         Returns:
             The URL to access the file.
         """
+        if name is None:
+            return ""
         key = self._normalize_name(name)
 
         # If custom domain is set, use it for direct URLs
@@ -401,11 +403,11 @@ class RustFSStorage(Storage):
         # Generate presigned URL for private access
         if self.presign_urls and self.default_acl == "private":
             try:
-                return self.client.generate_presigned_url(
+                return str(self.client.generate_presigned_url(
                     "get_object",
                     Params={"Bucket": self.bucket_name, "Key": key},
                     ExpiresIn=self.url_expiration,
-                )
+                ))
             except ClientError as e:
                 raise RustFSError(
                     f"Failed to generate URL for '{name}': {e}"
@@ -565,13 +567,14 @@ class RustFSStorage(Storage):
         """
         key = self._normalize_name(name)
         try:
-            return self.client.generate_presigned_post(
+            result = self.client.generate_presigned_post(
                 Bucket=self.bucket_name,
                 Key=key,
                 Fields=fields or {},
                 Conditions=conditions or [],
                 ExpiresIn=expires_in,
             )
+            return dict(result)
         except ClientError as e:
             raise RustFSError(
                 f"Failed to generate presigned POST URL for '{name}': {e}"
@@ -622,12 +625,14 @@ class RustFSStaticStorage(RustFSStorage):
         """Get a static-specific setting."""
         return getattr(django_settings, f"RUSTFS_{name}", default)
 
-    def url(self, name: str) -> str:
+    def url(self, name: str | None) -> str:
         """
         Return the URL for a static file.
 
         Static files use public-read ACL and direct URLs (no presigning).
         """
+        if name is None:
+            return ""
         key = self._normalize_name(name)
 
         if self.custom_domain:
