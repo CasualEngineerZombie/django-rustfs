@@ -40,7 +40,6 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         """Execute the health check."""
         bucket_name = options.get("bucket")
-        verbose = options.get("verbose", False)
 
         self.stdout.write("🔍 Checking RustFS health...\n")
 
@@ -48,7 +47,7 @@ class Command(BaseCommand):
         try:
             storage = RustFSStorage()
         except Exception as e:
-            raise CommandError(f"❌ Configuration error: {e}")
+            raise CommandError(f"❌ Configuration error: {e}") from e
 
         # Override bucket if specified
         if bucket_name:
@@ -79,23 +78,23 @@ class Command(BaseCommand):
                     )
                 )
                 self.stdout.write(
-                    f"     Tip: Run 'python manage.py rustfs_init_buckets' to create it"
+                    "     Tip: Run 'python manage.py rustfs_init_buckets' to create it"
                 )
             elif error_code in ("403", "InvalidAccessKeyId", "SignatureDoesNotMatch"):
                 raise CommandError(
                     f"  ❌ Authentication failed ({error_code}): {error_msg}\n"
                     f"     Check your RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY settings"
-                )
+                ) from e
             else:
                 raise CommandError(
                     f"  ❌ Bucket check failed ({error_code}): {error_msg}"
-                )
+                ) from e
         except Exception as e:
             raise CommandError(
                 f"  ❌ Cannot connect to RustFS at {endpoint}:\n"
                 f"     {type(e).__name__}: {e}\n"
                 f"     Check that RustFS is running and RUSTFS_ENDPOINT is correct"
-            )
+            ) from e
 
         # Check 2: List bucket contents (lightweight)
         try:

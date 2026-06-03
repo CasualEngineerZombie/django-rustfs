@@ -40,7 +40,12 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = ["Django>=4.2", "boto3>=1.28.0", "botocore>=1.31.0"]
+dependencies = [
+    "Django>=4.2",
+    "boto3>=1.28.0",
+    "botocore>=1.31.0",
+    "moto>=5.1.22",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -72,6 +77,8 @@ target-version = ["py39"]
 [tool.ruff]
 line-length = 100
 target-version = "py39"
+
+[tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
     "F",   # Pyflakes

@@ -13,7 +13,7 @@ from typing import Any
 from botocore.exceptions import ClientError
 from django.core.management.base import BaseCommand, CommandError
 
-from django_rustfs.storage import RustFSStorage, RustFSStaticStorage
+from django_rustfs.storage import RustFSStaticStorage, RustFSStorage
 
 
 class Command(BaseCommand):
@@ -65,7 +65,7 @@ class Command(BaseCommand):
         try:
             storage = RustFSStorage()
         except Exception as e:
-            raise CommandError(f"❌ Configuration error: {e}")
+            raise CommandError(f"❌ Configuration error: {e}") from e
 
         buckets_to_create = []
 
@@ -169,7 +169,7 @@ class Command(BaseCommand):
         # Check if bucket exists
         try:
             storage.client.head_bucket(Bucket=bucket_name)
-            self.stdout.write(f"     Status: Already exists ✓")
+            self.stdout.write("     Status: Already exists ✓")
             return "exists"
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "")
@@ -178,15 +178,15 @@ class Command(BaseCommand):
 
         # Create bucket
         if dry_run:
-            self.stdout.write(f"     Would create bucket (dry run)")
+            self.stdout.write("     Would create bucket (dry run)")
             if is_public:
-                self.stdout.write(f"     Would set public-read policy (dry run)")
+                self.stdout.write("     Would set public-read policy (dry run)")
             return "created"
 
         try:
             storage.client.create_bucket(Bucket=bucket_name)
             self.stdout.write(
-                self.style.SUCCESS(f"     Status: Created ✓")
+                self.style.SUCCESS("     Status: Created ✓")
             )
         except ClientError as e:
             return f"error:create_bucket failed: {e}"
@@ -198,7 +198,7 @@ class Command(BaseCommand):
                 storage.client.put_bucket_policy(
                     Bucket=bucket_name, Policy=policy
                 )
-                self.stdout.write(f"     Policy: public-read ✓")
+                self.stdout.write("     Policy: public-read ✓")
             except ClientError as e:
                 self.stdout.write(
                     self.style.WARNING(

@@ -370,7 +370,7 @@ class TestIntegrationWithMoto:
         """Set up moto mock S3 environment."""
         from moto import mock_aws
 
-        with mock_aws() as mock:
+        with mock_aws():
             # Create the S3 service with our endpoint
             import boto3
 

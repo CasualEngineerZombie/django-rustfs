@@ -8,9 +8,7 @@ file storage API, backed by RustFS's S3-compatible interface via boto3.
 import io
 import mimetypes
 import posixpath
-from datetime import timedelta
 from typing import Any
-from urllib.parse import urljoin
 
 import boto3
 import botocore.config
@@ -225,11 +223,11 @@ class RustFSStorage(Storage):
                     raise RustFSBucketError(
                         f"Failed to create bucket '{self.bucket_name}': "
                         f"{create_error}"
-                    )
+                    ) from create_error
             else:
                 raise RustFSBucketError(
                     f"Failed to check bucket '{self.bucket_name}': {e}"
-                )
+                ) from e
 
     def _normalize_name(self, name: str) -> str:
         """
@@ -310,7 +308,6 @@ class RustFSStorage(Storage):
         if not self.file_overwrite:
             name = self.get_available_name(name)
 
-        key = self._normalize_name(name)
         params = self._get_write_parameters(name)
         params["Body"] = content
 
