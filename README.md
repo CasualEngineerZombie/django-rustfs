@@ -391,7 +391,7 @@ MIT License — see [LICENSE](LICENSE) file.
 Contributions are welcome! Please open an issue or pull request on GitHub.
 
 ```bash
-git clone https://github.com/yourusername/django-rustfs
+git clone https://github.com/CasualEngineerZombie/django-rustfs
 cd django-rustfs
 pip install -e ".[dev]"
 pytest

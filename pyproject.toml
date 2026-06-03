@@ -61,11 +61,11 @@ dev = [
 docs = ["mkdocs>=1.5.0", "mkdocs-material>=9.1.0"]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/django-rustfs"
+Homepage = "https://github.com/CasualEngineerZombie/django-rustfs"
 Documentation = "https://django-rustfs.readthedocs.io"
-Repository = "https://github.com/yourusername/django-rustfs"
-Issues = "https://github.com/yourusername/django-rustfs/issues"
-Changelog = "https://github.com/yourusername/django-rustfs/blob/main/CHANGELOG.md"
+Repository = "https://github.com/CasualEngineerZombie/django-rustfs"
+Issues = "https://github.com/CasualEngineerZombie/django-rustfs/issues"
+Changelog = "https://github.com/CasualEngineerZombie/django-rustfs/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["django_rustfs"]
