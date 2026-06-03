@@ -98,9 +98,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
 
@@ -116,9 +115,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
 
@@ -134,9 +132,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
 
@@ -152,9 +149,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Bucket check failed" in str(exc_info.value)
 
@@ -166,9 +162,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Cannot connect to RustFS" in str(exc_info.value)
 
@@ -179,9 +174,8 @@ class TestRustFSHealthCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
             side_effect=ImproperlyConfigured("Missing endpoint"),
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_health", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_health", stdout=out)
 
         assert "Configuration error" in str(exc_info.value)
 
@@ -272,14 +266,13 @@ class TestRustFSInitBucketsCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             return_value=mock_storage,
-        ):
-            with patch(
-                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage"
-            ) as mock_static:
-                mock_static_storage = MagicMock()
-                mock_static_storage.bucket_name = "django-static"
-                mock_static.return_value = mock_static_storage
-                call_command("rustfs_init_buckets", stdout=out)
+        ), patch(
+            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage"
+        ) as mock_static:
+            mock_static_storage = MagicMock()
+            mock_static_storage.bucket_name = "django-static"
+            mock_static.return_value = mock_static_storage
+            call_command("rustfs_init_buckets", stdout=out)
 
         output = out.getvalue()
         assert "Initializing RustFS buckets" in output
@@ -360,9 +353,8 @@ class TestRustFSInitBucketsCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             side_effect=ImproperlyConfigured("Missing endpoint"),
-        ):
-            with pytest.raises(CommandError) as exc_info:
-                call_command("rustfs_init_buckets", stdout=out)
+        ), pytest.raises(CommandError) as exc_info:
+            call_command("rustfs_init_buckets", stdout=out)
 
         assert "Configuration error" in str(exc_info.value)
 
@@ -374,12 +366,11 @@ class TestRustFSInitBucketsCommand:
         with patch(
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             return_value=mock_storage,
+        ), patch(
+            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage",
+            side_effect=Exception("Static config error"),
         ):
-            with patch(
-                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage",
-                side_effect=Exception("Static config error"),
-            ):
-                call_command("rustfs_init_buckets", stdout=out)
+            call_command("rustfs_init_buckets", stdout=out)
 
         output = out.getvalue()
         assert "Could not configure static storage" in output

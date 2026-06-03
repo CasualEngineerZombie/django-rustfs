@@ -1,8 +1,6 @@
 """Tests for django-rustfs settings configuration."""
 
-import pytest
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 from django_rustfs.conf import Settings, get_setting
 
