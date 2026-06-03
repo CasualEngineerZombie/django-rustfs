@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-`django-rustfs` is a dedicated Django storage backend for RustFS — an emerging high-performance, S3-compatible object storage built in Rust (~23K GitHub stars, Apache 2.0 licensed). While RustFS is fully S3-compatible and works with the generic `django-storages` + `boto3` combination today, there is **no Django-native package** that provides a purpose-built, RustFS-branded developer experience. This project fills that gap.
+`django-rustfs` is a dedicated Django storage backend for RustFS - an emerging high-performance, S3-compatible object storage built in Rust (~23K GitHub stars, Apache 2.0 licensed). While RustFS is fully S3-compatible and works with the generic `django-storages` + `boto3` combination today, there is **no Django-native package** that provides a purpose-built, RustFS-branded developer experience. This project fills that gap.
 
 The core value proposition is **simplicity through focus**: by targeting only RustFS, we eliminate the configuration complexity of pretending to configure AWS S3, provide RustFS-native tooling (health checks, bucket initialization), and expose RustFS-specific features as they mature beyond beta.
 
@@ -20,7 +20,7 @@ The Django ecosystem has several storage backends for object storage. Understand
 | **django-minio-storage** | 167 | MinIO only | `minio` Python SDK | Active | 3.2+ |
 | **django-minio-backend** | ~200 | MinIO only | `minio` Python SDK | Active | 4.2+ |
 | **django-s3-storage** | ~500 | AWS S3 only | `boto3` | Active | 4.2+ |
-| **django-rustfs** *(this project)* | — | **RustFS only** | `boto3` *(RustFS-recommended SDK)* | **New** | **4.2+** |
+| **django-rustfs** *(this project)* | - | **RustFS only** | `boto3` *(RustFS-recommended SDK)* | **New** | **4.2+** |
 
 ### 1.2 How RustFS Is Currently Used with Django
 
@@ -28,7 +28,7 @@ Today, Django developers using RustFS follow one of two patterns:
 
 **Pattern A: django-storages + boto3 (most common)**
 ```python
-# settings.py — requires AWS-named settings for a non-AWS service
+# settings.py - requires AWS-named settings for a non-AWS service
 AWS_ACCESS_KEY_ID = "rustfs-key"
 AWS_SECRET_ACCESS_KEY = "rustfs-secret"
 AWS_STORAGE_BUCKET_NAME = "my-bucket"
@@ -41,7 +41,7 @@ DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 Pain points: AWS-branded settings for RustFS, 10+ configuration variables, no RustFS-specific tooling, bucket creation is manual.
 
 **Pattern B: Raw boto3 in custom storage (advanced users)**
-Developers implement their own thin storage class wrapping boto3. This is what `django-minio-storage` did for MinIO — using the MinIO Python SDK instead of boto3. RustFS [officially recommends using AWS S3 SDKs](https://docs.rustfs.com/developer/sdk/)[^25^] rather than vendor-specific SDKs, making boto3 the natural choice.
+Developers implement their own thin storage class wrapping boto3. This is what `django-minio-storage` did for MinIO - using the MinIO Python SDK instead of boto3. RustFS [officially recommends using AWS S3 SDKs](https://docs.rustfs.com/developer/sdk/)[^25^] rather than vendor-specific SDKs, making boto3 the natural choice.
 
 ### 1.3 The Gap: Why django-rustfs?
 
@@ -49,8 +49,8 @@ Developers implement their own thin storage class wrapping boto3. This is what `
 |----------------------------------|----------------------|
 | AWS-branded settings (`AWS_ACCESS_KEY_ID`, `AWS_S3_ENDPOINT_URL`) for a non-AWS service | Clean `RUSTFS_*` prefixed settings |
 | ~15 settings to understand and configure | ~5 essential settings with sensible defaults |
-| No bucket auto-creation — app crashes on first run if bucket missing | `RUSTFS_AUTO_CREATE_BUCKET = True` by default |
-| No built-in health check — discover connectivity issues at runtime | `python manage.py rustfs_health` command |
+| No bucket auto-creation - app crashes on first run if bucket missing | `RUSTFS_AUTO_CREATE_BUCKET = True` by default |
+| No built-in health check - discover connectivity issues at runtime | `python manage.py rustfs_health` command |
 | Manual bucket setup via RustFS console or CLI | `python manage.py rustfs_init_buckets` command |
 | No RustFS-specific features exposed (replication, lifecycle, event notifications) | Roadmap: expose RustFS-native APIs |
 | Static files require custom subclass | `RustFSStaticStorage` included with `public-read` defaults |
@@ -63,7 +63,7 @@ Developers implement their own thin storage class wrapping boto3. This is what `
 ### 2.1 Design Principles
 
 1. **Single responsibility**: Only RustFS. No Azure, no GCP, no SFTP.
-2. **Use standard SDKs**: RustFS recommends AWS S3 SDKs[^25^]. We use `boto3` directly — no additional SDK dependency.
+2. **Use standard SDKs**: RustFS recommends AWS S3 SDKs[^25^]. We use `boto3` directly - no additional SDK dependency.
 3. **Zero surprises**: Sensible defaults that work out of the box. The storage should not crash on first use.
 4. **Django-native**: Follow Django's storage API exactly. Support both the `DEFAULT_FILE_STORAGE` and `STORAGES` (Django 4.2+) configuration patterns.
 5. **Extensible**: Core is a thin boto3 wrapper. RustFS-specific features are added as methods, not breaking changes.
@@ -121,7 +121,7 @@ Developers implement their own thin storage class wrapping boto3. This is what `
 |----------|-----------|
 | **Use boto3, not a RustFS-specific SDK** | RustFS officially recommends AWS S3 SDKs. No RustFS Python SDK exists. boto3 is mature, well-maintained, and battle-tested.[^25^] |
 | **RUSTFS_* prefixed settings** | Eliminates confusion with AWS settings. Clear mental model: "I'm configuring RustFS, not pretending to configure AWS." |
-| **Auto-create buckets by default** | Developer experience: `pip install`, configure, run — no manual bucket creation step. Can be disabled. |
+| **Auto-create buckets by default** | Developer experience: `pip install`, configure, run - no manual bucket creation step. Can be disabled. |
 | **Separate `RustFSStaticStorage` class** | Static files need different defaults (public-read, overwrite enabled). Following django-minio-backend's pattern.[^18^] |
 | **Management commands for tooling** | Health checks and bucket init are operational concerns, not runtime code. Commands are the Django-idiomatic way to expose these. |
 | **~400 LOC core** | Following django-minio-storage's philosophy: "thoroughly tested, small code base that delegates as much as possible to the [boto3] client."[^22^] |
@@ -169,11 +169,11 @@ RustFS is not just "another S3-compatible storage." It has distinct characterist
 
 | RustFS Characteristic | Implication for django-rustfs |
 |----------------------|------------------------------|
-| **Apache 2.0 license** (vs MinIO's AGPL-3.0) | Commercial-friendly — no license contamination risk for proprietary Django apps |
-| **Built in Rust** — memory safety | Marketing angle: "memory-safe storage pipeline" |
+| **Apache 2.0 license** (vs MinIO's AGPL-3.0) | Commercial-friendly - no license contamination risk for proprietary Django apps |
+| **Built in Rust** - memory safety | Marketing angle: "memory-safe storage pipeline" |
 | **~2.3x faster than MinIO** for 4KB objects[^9^] | Performance claims in documentation |
-| **100% S3 compatibility**[^51^] | boto3 works perfectly — no compatibility shims needed |
-| **Beta status** (v1.0.0-beta.x) | First-mover advantage — establish the "official" Django integration before v1.0 stable |
+| **100% S3 compatibility**[^51^] | boto3 works perfectly - no compatibility shims needed |
+| **Beta status** (v1.0.0-beta.x) | First-mover advantage - establish the "official" Django integration before v1.0 stable |
 | **Built-in web console** (Vue.js) | Opportunity for Django admin integration |
 | **Bucket replication, lifecycle, event notifications**[^50^] | Future: expose these via management commands and model methods |
 | **No telemetry / GDPR compliant**[^6^] | Appeal for privacy-conscious European developers |
@@ -186,7 +186,7 @@ As RustFS matures beyond beta, these features can be exposed through django-rust
 |----------------|--------------------------|
 | **Bucket replication** | Management command `rustfs_replicate_setup` |
 | **Lifecycle rules (ILM)** | Model signal hooks for automatic lifecycle configuration |
-| **Event notifications (webhooks)** | Django signal integration — trigger actions on object events |
+| **Event notifications (webhooks)** | Django signal integration - trigger actions on object events |
 | **Object locking / WORM** | `save(locked=True)` parameter on FileField |
 | **Multi-site replication** | `RustFSStorage(replica_endpoint=...)` for failover |
 | **RustFS console API** | Django admin views for bucket browser |
@@ -197,16 +197,16 @@ As RustFS matures beyond beta, these features can be exposed through django-rust
 
 ### 5.1 Target Users
 
-1. **Django developers already using or evaluating RustFS** — they're our primary audience. They want a cleaner DX than django-storages.
-2. **Developers migrating from MinIO to RustFS** — RustFS's Apache 2.0 license is a key driver. django-minio-storage users need an equivalent.
-3. **European/privacy-conscious teams** — RustFS's no-telemetry policy appeals to GDPR-conscious organizations.
-4. **Performance-sensitive applications** — RustFS's speed claims attract developers building high-throughput file systems.
+1. **Django developers already using or evaluating RustFS** - they're our primary audience. They want a cleaner DX than django-storages.
+2. **Developers migrating from MinIO to RustFS** - RustFS's Apache 2.0 license is a key driver. django-minio-storage users need an equivalent.
+3. **European/privacy-conscious teams** - RustFS's no-telemetry policy appeals to GDPR-conscious organizations.
+4. **Performance-sensitive applications** - RustFS's speed claims attract developers building high-throughput file systems.
 
 ### 5.2 Distribution Strategy
 
 | Channel | Action |
 |---------|--------|
-| **PyPI** | `pip install django-rustfs` — primary distribution |
+| **PyPI** | `pip install django-rustfs` - primary distribution |
 | **GitHub** | Open-source repo with issues, discussions, PRs |
 | **RustFS Community** | Post in RustFS Discussions, link from RustFS docs |
 | **Django Community** | Post on django-users mailing list, Django forum |
@@ -290,14 +290,14 @@ python -m twine upload dist/*   # Upload to PyPI
 | RustFS v1.0 changes S3 API behavior | Medium | High | Follow RustFS beta closely; use moto for S3-compatible testing; pin boto3 version range |
 | django-storages adds RustFS-specific backend | Low | Medium | Our differentiation is focus and RustFS-native tooling, not just branding |
 | boto3 introduces breaking change | Low | Medium | Pin `boto3>=1.28.0,<2.0.0`; test against latest boto3 in CI |
-| RustFS project stalls or changes direction | Low | High | Code is ~400 LOC of boto3 wrapper — easily adaptable to any S3-compatible storage |
+| RustFS project stalls or changes direction | Low | High | Code is ~400 LOC of boto3 wrapper - easily adaptable to any S3-compatible storage |
 | Community prefers staying with django-storages | Medium | Low | Address via documentation showing concrete DX improvements; not a zero-sum game |
 
 ---
 
 ## 8. Conclusion
 
-`django-rustfs` addresses a clear, well-defined gap in the Django storage ecosystem. RustFS is a rapidly growing project with ~23K stars and strong momentum. There is no Django-native integration for it today — developers must use the generic S3 backend and tolerate AWS-branded configuration.
+`django-rustfs` addresses a clear, well-defined gap in the Django storage ecosystem. RustFS is a rapidly growing project with ~23K stars and strong momentum. There is no Django-native integration for it today - developers must use the generic S3 backend and tolerate AWS-branded configuration.
 
 By providing a focused, well-documented, and thoughtfully-designed storage backend, django-rustfs can become the **de facto standard** for using RustFS with Django, similar to how `django-minio-storage` serves the MinIO community.
 

@@ -3,7 +3,7 @@ django-rustfs: A plug-and-play Django storage backend for RustFS.
 
 RustFS is a high-performance, S3-compatible object storage built in Rust.
 This package provides a clean, purpose-built Django storage backend that
-feels native to RustFS — no AWS-named settings, no multi-backend baggage.
+feels native to RustFS - no AWS-named settings, no multi-backend baggage.
 
 Usage:
     1. Install: pip install django-rustfs

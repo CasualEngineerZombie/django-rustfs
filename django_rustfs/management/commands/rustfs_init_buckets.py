@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         if dry_run:
             self.stdout.write(
-                self.style.WARNING("🔍 DRY RUN — no changes will be made\n")
+                self.style.WARNING("🔍 DRY RUN - no changes will be made\n")
             )
 
         self.stdout.write("🪣 Initializing RustFS buckets...\n")
@@ -131,7 +131,7 @@ class Command(BaseCommand):
         if errors:
             for name, error in errors:
                 self.stdout.write(
-                    self.style.ERROR(f"  ❌ Failed:    {name} — {error}")
+                    self.style.ERROR(f"  ❌ Failed:    {name} - {error}")
                 )
 
         total = len(created_buckets) + len(existing_buckets)
@@ -160,9 +160,9 @@ class Command(BaseCommand):
         Create a single bucket and optionally set its policy.
 
         Returns:
-            "created" — bucket was created
-            "exists" — bucket already exists
-            "error:<msg>" — an error occurred
+            "created" - bucket was created
+            "exists" - bucket already exists
+            "error:<msg>" - an error occurred
         """
         self.stdout.write(f"\n  📦 Bucket: {bucket_name}")
 

@@ -552,7 +552,7 @@ class RustFSStorage(Storage):
         Generate a presigned POST URL for direct browser uploads.
 
         This allows browsers to upload files directly to RustFS without
-        going through your Django server — ideal for large files.
+        going through your Django server - ideal for large files.
 
         Args:
             name: The object key (file path) to upload to.

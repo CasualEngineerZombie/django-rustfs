@@ -1,6 +1,6 @@
 # django-rustfs
 
-A **plug-and-play Django storage backend** for [RustFS](https://rustfs.com/) — the high-performance, S3-compatible object storage built in Rust.
+A **plug-and-play Django storage backend** for [RustFS](https://rustfs.com/) - the high-performance, S3-compatible object storage built in Rust.
 
 ```bash
 pip install django-rustfs
@@ -15,12 +15,12 @@ You can already use RustFS with Django today via `django-storages` + `boto3`. So
 | | **django-storages + boto3** | **django-rustfs** |
 |---|---|---|
 | **Configuration** | 10+ AWS-named settings (`AWS_S3_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_SIGNATURE_VERSION`, `AWS_S3_FILE_OVERWRITE`, `AWS_DEFAULT_ACL`, `AWS_S3_VERIFY`, `AWS_S3_MAX_MEMORY_SIZE`...) | **5 clean, RustFS-branded settings** (`RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY`, `RUSTFS_BUCKET_NAME`) |
-| **Scope** | General-purpose (S3, Azure, GCP, FTP, SFTP...) | **Built exclusively for RustFS** — nothing more, nothing less |
-| **Bucket setup** | Manual — create buckets via RustFS console or CLI | **`python manage.py rustfs_init_buckets`** — creates buckets automatically |
-| **Health checks** | None built-in | **`python manage.py rustfs_health`** — connectivity, auth, upload/download roundtrip |
+| **Scope** | General-purpose (S3, Azure, GCP, FTP, SFTP...) | **Built exclusively for RustFS** - nothing more, nothing less |
+| **Bucket setup** | Manual - create buckets via RustFS console or CLI | **`python manage.py rustfs_init_buckets`** - creates buckets automatically |
+| **Health checks** | None built-in | **`python manage.py rustfs_health`** - connectivity, auth, upload/download roundtrip |
 | **Static files** | Requires custom subclass | **`RustFSStaticStorage`** included with `public-read` defaults |
 | **Dependencies** | `django-storages`, `boto3` (~2 packages to configure) | `boto3` only (~1 direct dependency) |
-| **Codebase** | ~1,500 lines for S3 backend (handles many edge cases for AWS) | **~400 lines focused on RustFS** — lean, readable, auditable |
+| **Codebase** | ~1,500 lines for S3 backend (handles many edge cases for AWS) | **~400 lines focused on RustFS** - lean, readable, auditable |
 
 > **Bottom line:** If you're using RustFS, `django-rustfs` removes the mental overhead of pretending you're configuring AWS S3.
 
@@ -49,7 +49,7 @@ RUSTFS_ENDPOINT = "http://localhost:9000"      # Your RustFS server URL
 RUSTFS_ACCESS_KEY = "your-access-key"          # RustFS access key
 RUSTFS_SECRET_KEY = "your-secret-key"          # RustFS secret key
 
-# Bucket configuration (optional — defaults shown)
+# Bucket configuration (optional - defaults shown)
 RUSTFS_BUCKET_NAME = "django-media"            # Media files bucket
 RUSTFS_STATIC_BUCKET_NAME = "django-static"    # Static files bucket
 RUSTFS_AUTO_CREATE_BUCKET = True               # Auto-create buckets on first use
@@ -181,8 +181,8 @@ python manage.py rustfs_health
 ```
 
 Options:
-- `--bucket <name>` — Check a specific bucket
-- `--verbose` — Show detailed response information
+- `--bucket <name>` - Check a specific bucket
+- `--verbose` - Show detailed response information
 
 ### `rustfs_init_buckets`
 
@@ -204,10 +204,10 @@ python manage.py rustfs_init_buckets
 ```
 
 Options:
-- `--bucket <name>` — Create only a specific bucket
-- `--public` — Make the bucket public-readable
-- `--skip-static` — Don't create the static files bucket
-- `--dry-run` — Preview what would be done
+- `--bucket <name>` - Create only a specific bucket
+- `--public` - Make the bucket public-readable
+- `--skip-static` - Don't create the static files bucket
+- `--dry-run` - Preview what would be done
 
 ---
 
@@ -342,7 +342,7 @@ DEFAULT_FILE_STORAGE = "django_rustfs.storage.RustFSStorage"
 
 ## How It Works
 
-django-rustfs uses **boto3** to communicate with RustFS. RustFS is fully S3-compatible, so the AWS SDK works out of the box — we just wrap it in a cleaner API:
+django-rustfs uses **boto3** to communicate with RustFS. RustFS is fully S3-compatible, so the AWS SDK works out of the box - we just wrap it in a cleaner API:
 
 ```
 ┌─────────────┐      ┌─────────────────┐      ┌─────────────┐
@@ -370,19 +370,19 @@ django-rustfs uses **boto3** to communicate with RustFS. RustFS is fully S3-comp
 
 ## Roadmap
 
-- [ ] **RustFS-native features** — Expose RustFS-specific capabilities (bucket replication, lifecycle rules, event notifications) as they stabilize beyond beta
-- [ ] **Django Admin integration** — View bucket contents, object metadata, and storage statistics in Django admin
-- [ ] **Management commands** — `sync_to_rustfs`, `sync_from_rustfs`, `clean_orphaned`
-- [ ] **Async support** — `aioboto3`-based async storage backend for ASGI deployments
-- [ ] **URL caching** — Cache presigned URLs with Django's cache framework to reduce S3 API calls
-- [ ] **Multipart upload** — Support large file uploads with resumable multipart uploads
-- [ ] **Streaming responses** — Memory-efficient `FileResponse` wrapper for serving large files
+- [ ] **RustFS-native features** - Expose RustFS-specific capabilities (bucket replication, lifecycle rules, event notifications) as they stabilize beyond beta
+- [ ] **Django Admin integration** - View bucket contents, object metadata, and storage statistics in Django admin
+- [ ] **Management commands** - `sync_to_rustfs`, `sync_from_rustfs`, `clean_orphaned`
+- [ ] **Async support** - `aioboto3`-based async storage backend for ASGI deployments
+- [ ] **URL caching** - Cache presigned URLs with Django's cache framework to reduce S3 API calls
+- [ ] **Multipart upload** - Support large file uploads with resumable multipart uploads
+- [ ] **Streaming responses** - Memory-efficient `FileResponse` wrapper for serving large files
 
 ---
 
 ## License
 
-Apache 2.0 License — see [LICENSE](LICENSE) file.
+Apache 2.0 License - see [LICENSE](LICENSE) file.
 
 ---
 
