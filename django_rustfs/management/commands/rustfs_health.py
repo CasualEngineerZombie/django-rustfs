@@ -73,9 +73,7 @@ class Command(BaseCommand):
 
             if error_code == "404":
                 self.stdout.write(
-                    self.style.WARNING(
-                        f"  ⚠️  Bucket '{storage.bucket_name}' does not exist"
-                    )
+                    self.style.WARNING(f"  ⚠️  Bucket '{storage.bucket_name}' does not exist")
                 )
                 self.stdout.write(
                     "     Tip: Run 'python manage.py rustfs_init_buckets' to create it"
@@ -86,9 +84,7 @@ class Command(BaseCommand):
                     f"     Check your RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY settings"
                 ) from e
             else:
-                raise CommandError(
-                    f"  ❌ Bucket check failed ({error_code}): {error_msg}"
-                ) from e
+                raise CommandError(f"  ❌ Bucket check failed ({error_code}): {error_msg}") from e
         except Exception as e:
             raise CommandError(
                 f"  ❌ Cannot connect to RustFS at {endpoint}:\n"
@@ -98,19 +94,13 @@ class Command(BaseCommand):
 
         # Check 2: List bucket contents (lightweight)
         try:
-            response = storage.client.list_objects_v2(
-                Bucket=storage.bucket_name, MaxKeys=1
-            )
+            response = storage.client.list_objects_v2(Bucket=storage.bucket_name, MaxKeys=1)
             object_count = response.get("KeyCount", 0)
             self.stdout.write(
                 self.style.SUCCESS(f"  ✅ List operation works ({object_count} objects visible)")
             )
         except ClientError as e:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"  ⚠️  List operation failed: {e}"
-                )
-            )
+            self.stdout.write(self.style.WARNING(f"  ⚠️  List operation failed: {e}"))
 
         # Check 3: Upload/Download/Delete roundtrip
         self.stdout.write("")
@@ -128,32 +118,20 @@ class Command(BaseCommand):
             )
 
             # Download
-            response = storage.client.get_object(
-                Bucket=storage.bucket_name, Key=test_key
-            )
+            response = storage.client.get_object(Bucket=storage.bucket_name, Key=test_key)
             downloaded = response["Body"].read()
 
             if downloaded == test_content:
-                self.stdout.write(
-                    self.style.SUCCESS("  ✅ Upload/download roundtrip successful")
-                )
+                self.stdout.write(self.style.SUCCESS("  ✅ Upload/download roundtrip successful"))
             else:
-                self.stdout.write(
-                    self.style.ERROR("  ❌ Data mismatch in roundtrip test")
-                )
+                self.stdout.write(self.style.ERROR("  ❌ Data mismatch in roundtrip test"))
 
             # Cleanup
-            storage.client.delete_object(
-                Bucket=storage.bucket_name, Key=test_key
-            )
+            storage.client.delete_object(Bucket=storage.bucket_name, Key=test_key)
 
         except Exception as e:
-            self.stdout.write(
-                self.style.ERROR(f"  ❌ Roundtrip test failed: {e}")
-            )
+            self.stdout.write(self.style.ERROR(f"  ❌ Roundtrip test failed: {e}"))
 
         # Summary
         self.stdout.write("")
-        self.stdout.write(
-            self.style.SUCCESS("✅ RustFS health check completed successfully!")
-        )
+        self.stdout.write(self.style.SUCCESS("✅ RustFS health check completed successfully!"))

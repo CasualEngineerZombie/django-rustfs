@@ -51,9 +51,7 @@ class Command(BaseCommand):
         dry_run = options.get("dry_run", False)
 
         if dry_run:
-            self.stdout.write(
-                self.style.WARNING("🔍 DRY RUN - no changes will be made\n")
-            )
+            self.stdout.write(self.style.WARNING("🔍 DRY RUN - no changes will be made\n"))
 
         self.stdout.write("🪣 Initializing RustFS buckets...\n")
 
@@ -90,16 +88,12 @@ class Command(BaseCommand):
                         )
                 except Exception as e:
                     self.stdout.write(
-                        self.style.WARNING(
-                            f"  ⚠️  Could not configure static storage: {e}"
-                        )
+                        self.style.WARNING(f"  ⚠️  Could not configure static storage: {e}")
                     )
 
         # Create each bucket
         for bucket_name, is_public in buckets_to_create:
-            result = self._create_bucket(
-                storage, bucket_name, is_public, dry_run
-            )
+            result = self._create_bucket(storage, bucket_name, is_public, dry_run)
             if result == "created":
                 created_buckets.append(bucket_name)
             elif result == "exists":
@@ -118,36 +112,24 @@ class Command(BaseCommand):
 
         if created_buckets:
             for name in created_buckets:
-                self.stdout.write(
-                    self.style.SUCCESS(f"  ✅ Created:   {name}")
-                )
+                self.stdout.write(self.style.SUCCESS(f"  ✅ Created:   {name}"))
 
         if existing_buckets:
             for name in existing_buckets:
-                self.stdout.write(
-                    self.style.NOTICE(f"  ℹ️  Existing:  {name}")
-                )
+                self.stdout.write(self.style.NOTICE(f"  ℹ️  Existing:  {name}"))
 
         if errors:
             for name, error in errors:
-                self.stdout.write(
-                    self.style.ERROR(f"  ❌ Failed:    {name} - {error}")
-                )
+                self.stdout.write(self.style.ERROR(f"  ❌ Failed:    {name} - {error}"))
 
         total = len(created_buckets) + len(existing_buckets)
         self.stdout.write("")
         if errors:
             self.stdout.write(
-                self.style.WARNING(
-                    f"Done: {total} bucket(s) OK, {len(errors)} error(s)"
-                )
+                self.style.WARNING(f"Done: {total} bucket(s) OK, {len(errors)} error(s)")
             )
         else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"✅ All done: {total} bucket(s) ready to use"
-                )
-            )
+            self.stdout.write(self.style.SUCCESS(f"✅ All done: {total} bucket(s) ready to use"))
 
     def _create_bucket(
         self,
@@ -185,9 +167,7 @@ class Command(BaseCommand):
 
         try:
             storage.client.create_bucket(Bucket=bucket_name)
-            self.stdout.write(
-                self.style.SUCCESS("     Status: Created ✓")
-            )
+            self.stdout.write(self.style.SUCCESS("     Status: Created ✓"))
         except ClientError as e:
             return f"error:create_bucket failed: {e}"
 
@@ -195,15 +175,11 @@ class Command(BaseCommand):
         if is_public:
             policy = self._public_bucket_policy(bucket_name)
             try:
-                storage.client.put_bucket_policy(
-                    Bucket=bucket_name, Policy=policy
-                )
+                storage.client.put_bucket_policy(Bucket=bucket_name, Policy=policy)
                 self.stdout.write("     Policy: public-read ✓")
             except ClientError as e:
                 self.stdout.write(
-                    self.style.WARNING(
-                        f"     Policy: Could not set public-read ({e})"
-                    )
+                    self.style.WARNING(f"     Policy: Could not set public-read ({e})")
                 )
 
         return "created"

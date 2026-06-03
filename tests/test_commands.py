@@ -95,10 +95,13 @@ class TestRustFSHealthCommand:
         )
         mock_storage.client.head_bucket.side_effect = error
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            return_value=mock_storage,
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
@@ -112,10 +115,13 @@ class TestRustFSHealthCommand:
         )
         mock_storage.client.head_bucket.side_effect = error
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            return_value=mock_storage,
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
@@ -129,10 +135,13 @@ class TestRustFSHealthCommand:
         )
         mock_storage.client.head_bucket.side_effect = error
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            return_value=mock_storage,
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Authentication failed" in str(exc_info.value)
@@ -146,10 +155,13 @@ class TestRustFSHealthCommand:
         )
         mock_storage.client.head_bucket.side_effect = error
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            return_value=mock_storage,
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Bucket check failed" in str(exc_info.value)
@@ -159,10 +171,13 @@ class TestRustFSHealthCommand:
         out = io.StringIO()
         mock_storage.client.head_bucket.side_effect = Exception("Connection refused")
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            return_value=mock_storage,
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Cannot connect to RustFS" in str(exc_info.value)
@@ -171,10 +186,13 @@ class TestRustFSHealthCommand:
         """Test health check with storage configuration error."""
         out = io.StringIO()
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_health.RustFSStorage",
-            side_effect=ImproperlyConfigured("Missing endpoint"),
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_health.RustFSStorage",
+                side_effect=ImproperlyConfigured("Missing endpoint"),
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_health", stdout=out)
 
         assert "Configuration error" in str(exc_info.value)
@@ -207,9 +225,7 @@ class TestRustFSHealthCommand:
         out = io.StringIO()
         mock_storage.client.head_bucket.return_value = {}
         mock_storage.client.list_objects_v2.return_value = {"KeyCount": 0}
-        mock_storage.client.get_object.return_value = {
-            "Body": io.BytesIO(b"wrong content")
-        }
+        mock_storage.client.get_object.return_value = {"Body": io.BytesIO(b"wrong content")}
 
         with patch(
             "django_rustfs.management.commands.rustfs_health.RustFSStorage",
@@ -263,12 +279,15 @@ class TestRustFSInitBucketsCommand:
         mock_storage.client.head_bucket.side_effect = error
         mock_storage.client.create_bucket.return_value = {}
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
-            return_value=mock_storage,
-        ), patch(
-            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage"
-        ) as mock_static:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            patch(
+                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage"
+            ) as mock_static,
+        ):
             mock_static_storage = MagicMock()
             mock_static_storage.bucket_name = "django-static"
             mock_static.return_value = mock_static_storage
@@ -325,9 +344,7 @@ class TestRustFSInitBucketsCommand:
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             return_value=mock_storage,
         ):
-            call_command(
-                "rustfs_init_buckets", bucket="my-bucket", public=True, stdout=out
-            )
+            call_command("rustfs_init_buckets", bucket="my-bucket", public=True, stdout=out)
 
         output = out.getvalue()
         assert "my-bucket" in output
@@ -350,10 +367,13 @@ class TestRustFSInitBucketsCommand:
         """Test with storage configuration error."""
         out = io.StringIO()
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
-            side_effect=ImproperlyConfigured("Missing endpoint"),
-        ), pytest.raises(CommandError) as exc_info:
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
+                side_effect=ImproperlyConfigured("Missing endpoint"),
+            ),
+            pytest.raises(CommandError) as exc_info,
+        ):
             call_command("rustfs_init_buckets", stdout=out)
 
         assert "Configuration error" in str(exc_info.value)
@@ -363,12 +383,15 @@ class TestRustFSInitBucketsCommand:
         out = io.StringIO()
         mock_storage.client.head_bucket.return_value = {}
 
-        with patch(
-            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
-            return_value=mock_storage,
-        ), patch(
-            "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage",
-            side_effect=Exception("Static config error"),
+        with (
+            patch(
+                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
+                return_value=mock_storage,
+            ),
+            patch(
+                "django_rustfs.management.commands.rustfs_init_buckets.RustFSStaticStorage",
+                side_effect=Exception("Static config error"),
+            ),
         ):
             call_command("rustfs_init_buckets", stdout=out)
 
@@ -431,9 +454,7 @@ class TestRustFSInitBucketsCommand:
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             return_value=mock_storage,
         ):
-            call_command(
-                "rustfs_init_buckets", bucket="public-bucket", public=True, stdout=out
-            )
+            call_command("rustfs_init_buckets", bucket="public-bucket", public=True, stdout=out)
 
         output = out.getvalue()
         assert "public-bucket" in output
@@ -458,9 +479,7 @@ class TestRustFSInitBucketsCommand:
             "django_rustfs.management.commands.rustfs_init_buckets.RustFSStorage",
             return_value=mock_storage,
         ):
-            call_command(
-                "rustfs_init_buckets", bucket="public-bucket", public=True, stdout=out
-            )
+            call_command("rustfs_init_buckets", bucket="public-bucket", public=True, stdout=out)
 
         output = out.getvalue()
         assert "Could not set public-read" in output

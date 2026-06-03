@@ -8,7 +8,7 @@ file storage API, backed by RustFS's S3-compatible interface via boto3.
 import io
 import mimetypes
 import posixpath
-from typing import Any
+from typing import Any, Optional
 
 import boto3
 import botocore.config
@@ -23,11 +23,13 @@ from django.utils.encoding import filepath_to_uri
 
 class RustFSError(Exception):
     """Base exception for RustFS storage errors."""
+
     pass
 
 
 class RustFSBucketError(RustFSError):
     """Raised when a bucket operation fails."""
+
     pass
 
 
@@ -76,60 +78,36 @@ class RustFSStorage(Storage):
         """
         # Collect all settings
         # Note: kwarg_key maps the attribute name to the expected kwarg name
-        self.endpoint_url = self._setting(
-            "ENDPOINT", kwargs, kwarg_key="endpoint_url"
-        )
-        self.access_key = self._setting(
-            "ACCESS_KEY", kwargs, kwarg_key="access_key"
-        )
-        self.secret_key = self._setting(
-            "SECRET_KEY", kwargs, kwarg_key="secret_key"
-        )
+        self.endpoint_url = self._setting("ENDPOINT", kwargs, kwarg_key="endpoint_url")
+        self.access_key = self._setting("ACCESS_KEY", kwargs, kwarg_key="access_key")
+        self.secret_key = self._setting("SECRET_KEY", kwargs, kwarg_key="secret_key")
         self.bucket_name = self._setting(
             "BUCKET_NAME", kwargs, "django-media", kwarg_key="bucket_name"
         )
         self.auto_create_bucket = self._setting(
             "AUTO_CREATE_BUCKET", kwargs, True, kwarg_key="auto_create_bucket"
         )
-        self.custom_domain = self._setting(
-            "CUSTOM_DOMAIN", kwargs, "", kwarg_key="custom_domain"
-        )
-        self.secure_urls = self._setting(
-            "SECURE_URLS", kwargs, True, kwarg_key="secure_urls"
-        )
+        self.custom_domain = self._setting("CUSTOM_DOMAIN", kwargs, "", kwarg_key="custom_domain")
+        self.secure_urls = self._setting("SECURE_URLS", kwargs, True, kwarg_key="secure_urls")
         self.url_expiration = self._setting(
             "URL_EXPIRATION", kwargs, 3600, kwarg_key="url_expiration"
         )
-        self.default_acl = self._setting(
-            "DEFAULT_ACL", kwargs, "private", kwarg_key="default_acl"
-        )
-        self.public_acl = self._setting(
-            "PUBLIC_ACL", kwargs, "public-read", kwarg_key="public_acl"
-        )
+        self.default_acl = self._setting("DEFAULT_ACL", kwargs, "private", kwarg_key="default_acl")
+        self.public_acl = self._setting("PUBLIC_ACL", kwargs, "public-read", kwarg_key="public_acl")
         self.file_overwrite = self._setting(
             "FILE_OVERWRITE", kwargs, False, kwarg_key="file_overwrite"
         )
         self.object_parameters = self._setting(
             "OBJECT_PARAMETERS", kwargs, {}, kwarg_key="object_parameters"
         )
-        self.location = self._setting(
-            "LOCATION", kwargs, "", kwarg_key="location"
-        ).lstrip("/")
-        self.region = self._setting(
-            "REGION", kwargs, "us-east-1", kwarg_key="region"
-        )
-        self.use_ssl = self._setting(
-            "USE_SSL", kwargs, False, kwarg_key="use_ssl"
-        )
-        self.verify_ssl = self._setting(
-            "VERIFY_SSL", kwargs, True, kwarg_key="verify_ssl"
-        )
+        self.location = self._setting("LOCATION", kwargs, "", kwarg_key="location").lstrip("/")
+        self.region = self._setting("REGION", kwargs, "us-east-1", kwarg_key="region")
+        self.use_ssl = self._setting("USE_SSL", kwargs, False, kwarg_key="use_ssl")
+        self.verify_ssl = self._setting("VERIFY_SSL", kwargs, True, kwarg_key="verify_ssl")
         self.max_pool_connections = self._setting(
             "MAX_POOL_CONNECTIONS", kwargs, 10, kwarg_key="max_pool_connections"
         )
-        self.presign_urls = self._setting(
-            "PRESIGN_URLS", kwargs, True, kwarg_key="presign_urls"
-        )
+        self.presign_urls = self._setting("PRESIGN_URLS", kwargs, True, kwarg_key="presign_urls")
 
         # Validate required settings
         self._validate_config()
@@ -144,7 +122,7 @@ class RustFSStorage(Storage):
         super().__init__()
 
     def _setting(
-        self, name: str, kwargs: dict, default: Any = "", kwarg_key: str | None = None
+        self, name: str, kwargs: dict, default: Any = "", kwarg_key: Optional[str] = None
     ) -> Any:
         """
         Get a setting value from kwargs or Django settings.
@@ -221,13 +199,10 @@ class RustFSStorage(Storage):
                     self._bucket_exists = True
                 except ClientError as create_error:
                     raise RustFSBucketError(
-                        f"Failed to create bucket '{self.bucket_name}': "
-                        f"{create_error}"
+                        f"Failed to create bucket '{self.bucket_name}': {create_error}"
                     ) from create_error
             else:
-                raise RustFSBucketError(
-                    f"Failed to check bucket '{self.bucket_name}': {e}"
-                ) from e
+                raise RustFSBucketError(f"Failed to check bucket '{self.bucket_name}': {e}") from e
 
     def _normalize_name(self, name: str) -> str:
         """
@@ -289,9 +264,7 @@ class RustFSStorage(Storage):
             content = response["Body"].read()
             return File(io.BytesIO(content), name=name)
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to open '{name}' from RustFS: {e}"
-            ) from e
+            raise RustFSError(f"Failed to open '{name}' from RustFS: {e}") from e
 
     def _save(self, name: str, content: File) -> str:
         """
@@ -314,9 +287,7 @@ class RustFSStorage(Storage):
         try:
             self.client.put_object(**params)
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to save '{name}' to RustFS: {e}"
-            ) from e
+            raise RustFSError(f"Failed to save '{name}' to RustFS: {e}") from e
 
         return name
 
@@ -331,9 +302,7 @@ class RustFSStorage(Storage):
         try:
             self.client.delete_object(Bucket=self.bucket_name, Key=key)
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to delete '{name}' from RustFS: {e}"
-            ) from e
+            raise RustFSError(f"Failed to delete '{name}' from RustFS: {e}") from e
 
     def exists(self, name: str) -> bool:
         """
@@ -352,9 +321,7 @@ class RustFSStorage(Storage):
         except ClientError as e:
             if e.response["Error"]["Code"] == "404":
                 return False
-            raise RustFSError(
-                f"Failed to check existence of '{name}': {e}"
-            ) from e
+            raise RustFSError(f"Failed to check existence of '{name}': {e}") from e
 
     def size(self, name: str) -> int:
         """
@@ -368,16 +335,12 @@ class RustFSStorage(Storage):
         """
         key = self._normalize_name(name)
         try:
-            response = self.client.head_object(
-                Bucket=self.bucket_name, Key=key
-            )
+            response = self.client.head_object(Bucket=self.bucket_name, Key=key)
             return int(response["ContentLength"])
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to get size of '{name}': {e}"
-            ) from e
+            raise RustFSError(f"Failed to get size of '{name}': {e}") from e
 
-    def url(self, name: str | None) -> str:
+    def url(self, name: Optional[str]) -> str:
         """
         Get the URL for a file.
 
@@ -403,20 +366,22 @@ class RustFSStorage(Storage):
         # Generate presigned URL for private access
         if self.presign_urls and self.default_acl == "private":
             try:
-                return str(self.client.generate_presigned_url(
-                    "get_object",
-                    Params={"Bucket": self.bucket_name, "Key": key},
-                    ExpiresIn=self.url_expiration,
-                ))
+                return str(
+                    self.client.generate_presigned_url(
+                        "get_object",
+                        Params={"Bucket": self.bucket_name, "Key": key},
+                        ExpiresIn=self.url_expiration,
+                    )
+                )
             except ClientError as e:
-                raise RustFSError(
-                    f"Failed to generate URL for '{name}': {e}"
-                ) from e
+                raise RustFSError(f"Failed to generate URL for '{name}': {e}") from e
 
         # Direct URL via endpoint
         scheme = "https" if self.secure_urls else "http"
         endpoint = self.endpoint_url.rstrip("/")
-        return f"{scheme}://{endpoint.split('://', 1)[-1]}/{self.bucket_name}/{filepath_to_uri(key)}"
+        return (
+            f"{scheme}://{endpoint.split('://', 1)[-1]}/{self.bucket_name}/{filepath_to_uri(key)}"
+        )
 
     def listdir(self, path: str = "") -> tuple:
         """
@@ -457,7 +422,7 @@ class RustFSStorage(Storage):
 
         return list(directories), files
 
-    def get_available_name(self, name: str, max_length: int | None = None) -> str:
+    def get_available_name(self, name: str, max_length: Optional[int] = None) -> str:
         """
         Get an available name for the file, handling duplicates.
 
@@ -482,9 +447,7 @@ class RustFSStorage(Storage):
 
         Raises NotImplementedError since RustFS is remote storage.
         """
-        raise NotImplementedError(
-            "RustFS storage does not support local filesystem paths."
-        )
+        raise NotImplementedError("RustFS storage does not support local filesystem paths.")
 
     # ------------------------------------------------------------------
     # RustFS-specific convenience methods
@@ -505,9 +468,7 @@ class RustFSStorage(Storage):
         """
         key = self._normalize_name(name)
         try:
-            response = self.client.head_object(
-                Bucket=self.bucket_name, Key=key
-            )
+            response = self.client.head_object(Bucket=self.bucket_name, Key=key)
             return {
                 "etag": response.get("ETag", "").strip('"'),
                 "last_modified": response.get("LastModified"),
@@ -518,9 +479,7 @@ class RustFSStorage(Storage):
                 "version_id": response.get("VersionId", ""),
             }
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to get metadata for '{name}': {e}"
-            ) from e
+            raise RustFSError(f"Failed to get metadata for '{name}': {e}") from e
 
     def copy_object(self, source_name: str, dest_name: str) -> None:
         """
@@ -543,12 +502,14 @@ class RustFSStorage(Storage):
                 Key=dest_key,
             )
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to copy '{source_name}' to '{dest_name}': {e}"
-            ) from e
+            raise RustFSError(f"Failed to copy '{source_name}' to '{dest_name}': {e}") from e
 
     def get_presigned_post_url(
-        self, name: str, expires_in: int = 3600, fields: dict | None = None, conditions: list | None = None
+        self,
+        name: str,
+        expires_in: int = 3600,
+        fields: Optional[dict] = None,
+        conditions: Optional[list] = None,
     ) -> dict:
         """
         Generate a presigned POST URL for direct browser uploads.
@@ -576,9 +537,7 @@ class RustFSStorage(Storage):
             )
             return dict(result)
         except ClientError as e:
-            raise RustFSError(
-                f"Failed to generate presigned POST URL for '{name}': {e}"
-            ) from e
+            raise RustFSError(f"Failed to generate presigned POST URL for '{name}': {e}") from e
 
     def is_available(self) -> bool:
         """
@@ -614,7 +573,9 @@ class RustFSStaticStorage(RustFSStorage):
         Overrides bucket name, location, and ACL for static files.
         """
         # Set static-specific defaults before calling super
-        kwargs.setdefault("bucket_name", self._static_setting("STATIC_BUCKET_NAME", "django-static"))
+        kwargs.setdefault(
+            "bucket_name", self._static_setting("STATIC_BUCKET_NAME", "django-static")
+        )
         kwargs.setdefault("location", self._static_setting("STATIC_LOCATION", "static"))
         kwargs.setdefault("default_acl", self._static_setting("STATIC_DEFAULT_ACL", "public-read"))
         kwargs.setdefault("presign_urls", False)  # Static files should be public
@@ -625,7 +586,7 @@ class RustFSStaticStorage(RustFSStorage):
         """Get a static-specific setting."""
         return getattr(django_settings, f"RUSTFS_{name}", default)
 
-    def url(self, name: str | None) -> str:
+    def url(self, name: Optional[str]) -> str:
         """
         Return the URL for a static file.
 

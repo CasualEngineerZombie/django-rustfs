@@ -73,15 +73,13 @@ class Settings:
         access_key = getattr(settings, "RUSTFS_ACCESS_KEY", cls.ACCESS_KEY)
         if not access_key:
             raise ImproperlyConfigured(
-                "django-rustfs: RUSTFS_ACCESS_KEY is required. "
-                "Set it to your RustFS access key."
+                "django-rustfs: RUSTFS_ACCESS_KEY is required. Set it to your RustFS access key."
             )
 
         secret_key = getattr(settings, "RUSTFS_SECRET_KEY", cls.SECRET_KEY)
         if not secret_key:
             raise ImproperlyConfigured(
-                "django-rustfs: RUSTFS_SECRET_KEY is required. "
-                "Set it to your RustFS secret key."
+                "django-rustfs: RUSTFS_SECRET_KEY is required. Set it to your RustFS secret key."
             )
 
 

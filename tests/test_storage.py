@@ -135,9 +135,7 @@ class TestRustFSStorageOperations:
         storage.client.head_object.side_effect = None
         storage.client.head_object.return_value = {"ContentLength": 100}
         assert storage.exists("photo.jpg") is True
-        storage.client.head_object.assert_called_once_with(
-            Bucket="test-bucket", Key="photo.jpg"
-        )
+        storage.client.head_object.assert_called_once_with(Bucket="test-bucket", Key="photo.jpg")
 
     def test_exists_false(self, storage):
         """Test exists() when object does not exist."""
@@ -161,9 +159,7 @@ class TestRustFSStorageOperations:
     def test_delete(self, storage):
         """Test delete() calls S3 delete_object."""
         storage.delete("photo.jpg")
-        storage.client.delete_object.assert_called_once_with(
-            Bucket="test-bucket", Key="photo.jpg"
-        )
+        storage.client.delete_object.assert_called_once_with(Bucket="test-bucket", Key="photo.jpg")
 
     def test_delete_raises_on_error(self, storage):
         """Test delete() raises RustFSError on failure."""
@@ -216,9 +212,7 @@ class TestRustFSStorageOperations:
 
     def test_open(self, storage):
         """Test _open() returns a File object with correct content."""
-        storage.client.get_object.return_value = {
-            "Body": io.BytesIO(b"file content")
-        }
+        storage.client.get_object.return_value = {"Body": io.BytesIO(b"file content")}
         file_obj = storage._open("test.txt")
         assert file_obj.read() == b"file content"
 
@@ -495,9 +489,7 @@ class TestIntegrationWithMoto:
     def test_listdir_with_moto(self, real_storage):
         """Test listdir with moto mock."""
         # Create some objects
-        real_storage.client.put_object(
-            Bucket="test-bucket", Key="prefix/folder1/", Body=b""
-        )
+        real_storage.client.put_object(Bucket="test-bucket", Key="prefix/folder1/", Body=b"")
         real_storage.client.put_object(
             Bucket="test-bucket", Key="prefix/file1.txt", Body=b"content1"
         )
@@ -537,9 +529,7 @@ class TestIntegrationWithMoto:
 
         storage._ensure_bucket()
         assert storage._bucket_exists is True
-        storage.client.head_bucket.assert_called_once_with(
-            Bucket=storage.bucket_name
-        )
+        storage.client.head_bucket.assert_called_once_with(Bucket=storage.bucket_name)
 
     def test_ensure_bucket_creates_when_missing(self):
         """Test _ensure_bucket creates bucket when it doesn't exist."""
@@ -560,9 +550,7 @@ class TestIntegrationWithMoto:
 
         storage._ensure_bucket()
         assert storage._bucket_exists is True
-        storage.client.create_bucket.assert_called_once_with(
-            Bucket=storage.bucket_name
-        )
+        storage.client.create_bucket.assert_called_once_with(Bucket=storage.bucket_name)
 
     def test_ensure_bucket_create_fails(self):
         """Test _ensure_bucket raises when create fails."""
