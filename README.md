@@ -397,6 +397,12 @@ pip install -e ".[dev]"
 pytest
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## Releasing
+
+See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for step-by-step instructions on publishing to PyPI.
+
 ---
 
 Built with ❤️ for the RustFS community.
