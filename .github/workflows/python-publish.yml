@@ -12,12 +12,17 @@ permissions:
 
 jobs:
   release-build:
+    name: Build distribution
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      attestations: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -41,13 +46,15 @@ jobs:
         with:
           name: release-dists
           path: dist/
+          if-no-files-found: error
 
   pypi-publish:
+    name: Publish to PyPI
     runs-on: ubuntu-latest
     needs:
       - release-build
     permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: read
       id-token: write
 
     environment:
@@ -55,13 +62,14 @@ jobs:
       url: https://pypi.org/project/django-rustfs/${{ github.event.release.name }}
 
     steps:
-      - name: Retrieve release distributions
+      - name: Download distributions
         uses: actions/download-artifact@v4
         with:
           name: release-dists
           path: dist/
 
-      - name: Publish release distributions to PyPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          print-hash: true
