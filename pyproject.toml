@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "django-rustfs"
 version = "0.2.0"
-description = "A plug-and-play Django storage backend for RustFS - the high-performance, S3-compatible object storage."
+description = "Django storage backend for RustFS — an S3-compatible object storage server"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
