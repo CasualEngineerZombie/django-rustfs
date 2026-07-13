@@ -352,10 +352,6 @@ pip install -e ".[dev]"
 pytest
 ```
 
-## Releasing
-
-See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for step-by-step instructions on publishing to PyPI.
-
 ---
 
 ## Roadmap
