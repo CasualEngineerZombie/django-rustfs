@@ -194,10 +194,7 @@ def test_private_presigned_url(storage):
 
     assert url.startswith(storage.endpoint_url)
     assert "private/file.txt" in url
-    assert any(
-        parameter in url
-        for parameter in ("AWSAccessKeyId", "X-Amz-Credential")
-    )
+    assert any(parameter in url for parameter in ("AWSAccessKeyId", "X-Amz-Credential"))
     assert any(parameter in url for parameter in ("Signature", "X-Amz-Signature"))
 
     with closing(urllib.request.urlopen(url, timeout=10)) as response:
