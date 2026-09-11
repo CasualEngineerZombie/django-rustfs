@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-09-11
+
+### Added
+- Django 6.1 support across Python 3.12, 3.13, and 3.14
+- RustFS integration test suite (`tests/test_rustfs_integration.py`) against real RustFS server
+- GitHub Actions workflow for RustFS integration tests with Docker
+- Full documentation site with MkDocs Material theme (https://django-rustfs.rianbarriga.com/)
+- Documentation pages: installation, configuration, API reference, management commands, integration testing, contributing
+- GitHub Pages auto-deploy workflow for documentation
+- Custom domain support for documentation site
+
+### Changed
+- Restricted Django dependency to `>=4.2,<7.0` for compatibility
+- Integration tests excluded from standard CI matrix (run separately in dedicated workflow)
+- Presigned URL test made more generic to support different S3 implementations
+
+### Fixed
+- CI: Added `allow-prereleases: true` for Python 3.14 in all workflows
+- CI: Fixed ruff formatting in integration test file
+- CI: Handle 403 errors gracefully in public direct URL integration test
+
 ## [0.2.0] - 2026-06-04
 
 ### Added

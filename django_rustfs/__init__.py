@@ -12,5 +12,5 @@ Usage:
     4. Set DEFAULT_FILE_STORAGE = 'django_rustfs.storage.RustFSStorage'
 """
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
 __all__ = ["RustFSStorage"]
