@@ -32,26 +32,24 @@ jobs:
             /data
 
       - name: Wait for RustFS
-        env:
-          RUSTFS_ACCESS_KEY: test-access-key
-          RUSTFS_SECRET_KEY: test-secret-key
         run: |
           python - <<'PY'
           import time
           import urllib.error
           import urllib.request
 
-          url = "http://127.0.0.1:9000/"
-          deadline = time.time() + 60
+          url = "http://127.0.0.1:9000/health"
+          deadline = time.time() + 120
 
           while time.time() < deadline:
               try:
-                  urllib.request.urlopen(url, timeout=2)
-                  break
+                  with urllib.request.urlopen(url, timeout=2) as response:
+                      if response.status == 200:
+                          break
               except (urllib.error.URLError, TimeoutError):
                   time.sleep(2)
           else:
-              raise SystemExit("RustFS did not become ready within 60 seconds")
+              raise SystemExit("RustFS did not become ready within 120 seconds")
           PY
 
       - name: Install dependencies
