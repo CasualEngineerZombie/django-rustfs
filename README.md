@@ -270,10 +270,10 @@ post_data = storage.get_presigned_post_url(
 storage = RustFSStorage()
 meta = storage.get_object_metadata("uploads/photo.jpg")
 
-print(meta["etag"])           # "d41d8cd98f00b204e9800998ecf8427e"
-print(meta["content_length"]) # 2048
+print(meta["etag"])  # "d41d8cd98f00b204e9800998ecf8427e"
+print(meta["content_length"])  # 2048
 print(meta["storage_class"])  # "STANDARD"
-print(meta["version_id"])     # "uuid-v1"
+print(meta["version_id"])  # "uuid-v1"
 ```
 
 ### Copy Objects
