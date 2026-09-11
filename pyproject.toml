@@ -14,7 +14,6 @@ keywords = [
     "django",
     "rustfs",
     "s3",
-    "storage",
     "object-storage",
     "file-storage",
     "minio",
@@ -102,5 +101,8 @@ django_settings_module = "tests.settings"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
+markers = [
+    "integration: tests that require a running RustFS S3-compatible service",
+]
 testpaths = ["tests"]
 addopts = "--cov=django_rustfs --cov-report=term-missing --cov-fail-under=90"
