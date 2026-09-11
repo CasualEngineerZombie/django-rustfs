@@ -1,6 +1,8 @@
-# RustFS integration testing
+# Integration Testing
 
 The integration suite in `tests/test_rustfs_integration.py` runs the Django storage backend against a real RustFS S3-compatible server. The existing test suite continues to use Moto for fast unit/compatibility tests.
+
+---
 
 ## Run locally
 
@@ -23,7 +25,15 @@ pip install -e ".[dev]"
 pytest -m integration --no-cov -v
 ```
 
-The tests default to `http://127.0.0.1:9000`, `test-access-key`, and `test-secret-key`. Override them with `RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY`, and `RUSTFS_REGION` when using a different local RustFS instance.
+!!! info "Environment variables"
+    The tests default to `http://127.0.0.1:9000`, `test-access-key`, and `test-secret-key`. Override them with:
+
+    | Variable | Default |
+    |---|---|
+    | `RUSTFS_ENDPOINT` | `http://127.0.0.1:9000` |
+    | `RUSTFS_ACCESS_KEY` | `test-access-key` |
+    | `RUSTFS_SECRET_KEY` | `test-secret-key` |
+    | `RUSTFS_REGION` | `us-east-1` |
 
 Stop the local container when finished:
 
@@ -31,11 +41,15 @@ Stop the local container when finished:
 docker stop django-rustfs-test
 ```
 
+---
+
 ## CI
 
 GitHub Actions starts an isolated RustFS container for the integration job. The integration job currently runs against Python 3.14 and Django 6.1, while the normal unit-test matrix remains unchanged.
 
 The integration suite creates a unique bucket per test and removes its objects and bucket during fixture cleanup, so tests do not depend on shared or public RustFS infrastructure.
+
+---
 
 ## What is covered
 

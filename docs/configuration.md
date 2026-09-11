@@ -2,7 +2,9 @@
 
 All settings use the `RUSTFS_` prefix.
 
-## Required Settings
+---
+
+## Required
 
 | Setting | Description | Example |
 |---|---|---|
@@ -10,9 +12,12 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_ACCESS_KEY` | RustFS access key | `"your-access-key"` |
 | `RUSTFS_SECRET_KEY` | RustFS secret key | `"your-secret-key"` |
 
-## Optional Settings
+!!! danger "Required"
+    These three settings must be set or the backend will raise `ImproperlyConfigured` on initialization.
 
-### Bucket Settings
+---
+
+## Bucket Settings
 
 | Setting | Default | Description |
 |---|---|---|
@@ -20,7 +25,9 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_STATIC_BUCKET_NAME` | `"django-static"` | Bucket for static files |
 | `RUSTFS_AUTO_CREATE_BUCKET` | `True` | Auto-create buckets on first use |
 
-### URL Generation
+---
+
+## URL Generation
 
 | Setting | Default | Description |
 |---|---|---|
@@ -28,7 +35,9 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_SECURE_URLS` | `True` | Use HTTPS in generated URLs |
 | `RUSTFS_URL_EXPIRATION` | `3600` | Presigned URL expiry in seconds |
 
-### File Behavior
+---
+
+## File Behavior
 
 | Setting | Default | Description |
 |---|---|---|
@@ -39,7 +48,9 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_LOCATION` | `""` | Prefix path for uploads (e.g., `"media/"`) |
 | `RUSTFS_STATIC_LOCATION` | `""` | Prefix path for static files |
 
-### Connection
+---
+
+## Connection
 
 | Setting | Default | Description |
 |---|---|---|
@@ -50,7 +61,9 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_CONNECT_TIMEOUT` | `5` | Connection timeout in seconds |
 | `RUSTFS_READ_TIMEOUT` | `30` | Read timeout in seconds |
 
-### Performance
+---
+
+## Performance
 
 | Setting | Default | Description |
 |---|---|---|
@@ -58,7 +71,9 @@ All settings use the `RUSTFS_` prefix.
 | `RUSTFS_REDUCED_REDUNDANCY` | `False` | Use reduced redundancy storage |
 | `RUSTFS_ENCRYPTION` | `False` | Enable server-side encryption |
 
-## Example Configuration
+---
+
+## Full example
 
 ```python
 # settings.py
@@ -88,9 +103,11 @@ RUSTFS_REGION = "us-east-1"
 RUSTFS_USE_SSL = False
 ```
 
-## Per-Instance Overrides
+---
 
-You can override settings when instantiating the storage backend directly:
+## Per-instance overrides
+
+You can override any setting when instantiating the storage backend directly:
 
 ```python
 from django_rustfs.storage import RustFSStorage
@@ -104,3 +121,8 @@ private_storage = RustFSStorage(
     presign_urls=True,
 )
 ```
+
+!!! info "Priority"
+    1. Keyword arguments (highest)
+    2. Django settings (`RUSTFS_*`)
+    3. Built-in defaults (lowest)

@@ -1,5 +1,7 @@
 # Management Commands
 
+---
+
 ## rustfs_health
 
 Check connectivity, authentication, and run an upload/download roundtrip test.
@@ -17,28 +19,32 @@ python manage.py rustfs_health --verbose
 | `--bucket` | Specific bucket to check (defaults to `RUSTFS_BUCKET_NAME`) |
 | `--verbose` | Show detailed response information |
 
-### What It Checks
+### What it checks
 
 1. **Bucket accessibility** — verifies the configured bucket exists and is reachable
 2. **List operation** — confirms you can list objects in the bucket
 3. **Roundtrip test** — uploads a test file, downloads it, verifies contents, and cleans up
 
-### Example Output
+!!! success "Expected output"
+    ```
+    🔍 Checking RustFS health...
+       Endpoint: http://localhost:9000
+       Bucket:   django-media
 
-```
-🔍 Checking RustFS health...
-   Endpoint: http://localhost:9000
-   Bucket:   django-media
+      ✅ Bucket 'django-media' is accessible
+         Response time: 12.3ms
+      ✅ List operation works (0 objects visible)
 
-  ✅ Bucket 'django-media' is accessible
-     Response time: 12.3ms
-  ✅ List operation works (0 objects visible)
+      🧪 Running upload/download roundtrip test...
+      ✅ Upload/download roundtrip successful
 
-  🧪 Running upload/download roundtrip test...
-  ✅ Upload/download roundtrip successful
+    ✅ RustFS health check completed successfully!
+    ```
 
-✅ RustFS health check completed successfully!
-```
+!!! warning "Troubleshooting"
+    - **403 / Auth error** — check `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY`
+    - **Connection refused** — verify `RUSTFS_ENDPOINT` and that RustFS is running
+    - **Bucket not found** — run `python manage.py rustfs_init_buckets` first
 
 ---
 
@@ -62,29 +68,35 @@ python manage.py rustfs_init_buckets --dry-run
 | `--public` | Make the bucket public-readable |
 | `--dry-run` | Show what would be done without making changes |
 
-### What It Does
+### What it does
 
 1. Creates the media bucket (`RUSTFS_BUCKET_NAME`) if it doesn't exist
 2. Creates the static bucket (`RUSTFS_STATIC_BUCKET_NAME`) if it doesn't exist
 3. Sets public-read policy on buckets when `--public` is used
 
-### Example Output
+!!! success "Expected output"
+    ```
+    🪣 Initializing RustFS buckets...
 
-```
-🪣 Initializing RustFS buckets...
+      📦 Bucket: django-media
+         Status: Created ✓
 
-  📦 Bucket: django-media
-     Status: Created ✓
+      📦 Bucket: django-static
+         Status: Created ✓
+         Policy: public-read ✓
 
-  📦 Bucket: django-static
-     Status: Created ✓
-     Policy: public-read ✓
+    ==================================================
+    RESULTS
+    ==================================================
+      ✅ Created:   django-media
+      ✅ Created:   django-static
 
-==================================================
-RESULTS
-==================================================
-  ✅ Created:   django-media
-  ✅ Created:   django-static
+    ✅ All done: 2 bucket(s) ready to use
+    ```
 
-✅ All done: 2 bucket(s) ready to use
-```
+!!! info "Dry run"
+    Use `--dry-run` to preview what would be created without making any changes:
+
+    ```bash
+    python manage.py rustfs_init_buckets --dry-run
+    ```

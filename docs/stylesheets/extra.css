@@ -1,0 +1,127 @@
+/* ── Hero ── */
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.md-typeset .hero h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+  background: linear-gradient(135deg, var(--md-primary-fg-color), var(--md-accent-fg-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.md-typeset .hero .hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 1.2rem;
+}
+
+/* ── Badges row ── */
+.md-typeset .badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+/* ── Feature grid cards ── */
+.md-typeset .grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.md-typeset .grid-card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.6rem;
+  padding: 1.4rem 1.2rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.md-typeset .grid-card:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.md-typeset .grid-card .card-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.md-typeset .grid-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.md-typeset .grid-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--md-default-fg-color--light);
+  line-height: 1.5;
+}
+
+/* Dark mode card contrast */
+[data-md-color-scheme="slate"] .md-typeset .grid-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid-card:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Comparison table ── */
+.md-typeset table:not([class]) {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+.md-typeset table:not([class]) th {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Code block tweaks ── */
+.md-typeset pre > code {
+  font-size: 0.82rem;
+}
+
+/* ── Quick-start install box ── */
+.md-typeset .install-box {
+  background: var(--md-code-bg-color);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  padding: 1rem 1.4rem;
+  margin: 1rem 0;
+  font-family: var(--md-code-font-family);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .install-box {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Section divider ── */
+.md-typeset .section-divider {
+  border: none;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  margin: 2rem 0;
+}
+
+/* ── Footer ── */
+.md-footer {
+  margin-top: 0;
+}
