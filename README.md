@@ -6,7 +6,7 @@ Django storage backend for RustFS; an S3-compatible object storage server.
 
 [![PyPI version](https://badge.fury.io/py/django-rustfs.svg)](https://badge.fury.io/py/django-rustfs)
 [![Python versions](https://img.shields.io/pypi/pyversions/django-rustfs.svg)](https://pypi.org/project/django-rustfs/)
-[![Django versions](https://img.shields.io/badge/django-4.2%20%7C%205.0%20%7C%205.1%20%7C%205.2-blue.svg)](https://www.djangoproject.com/)
+[![Django versions](https://img.shields.io/badge/django-4.2%20%7C%205.0%20%7C%205.1%20%7C%205.2%20%7C%206.1-blue.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Tests](https://github.com/CasualEngineerZombie/django-rustfs/workflows/Python%20package/badge.svg)](https://github.com/CasualEngineerZombie/django-rustfs/actions)
 [![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen.svg)](https://github.com/CasualEngineerZombie/django-rustfs)
@@ -43,7 +43,7 @@ You can already use RustFS with Django via `django-storages` + `boto3`. So why a
 | **Scope** | General-purpose (S3, Azure, GCP...) | **Built exclusively for RustFS** |
 | **Bucket setup** | Manual CLI/console | **`python manage.py rustfs_init_buckets`** |
 | **Health checks** | None | **`python manage.py rustfs_health`** |
-| **Static files** | Custom subclass required | **`RustFSStaticStorage`** included |
+| **Static files** | Custom subclass required | **`RustFSStaticStorage` included** |
 | **Dependencies** | `django-storages` + `boto3` | `boto3` only |
 | **Codebase** | ~1,500 lines | **~400 lines focused on RustFS** |
 
@@ -59,8 +59,20 @@ pip install django-rustfs
 
 **Requirements:**
 - Python 3.9+
-- Django 4.2+
+- Django 4.2 through 6.1
 - boto3 1.28+
+
+### Django compatibility
+
+| Django | Python |
+|---|---|
+| 4.2 | 3.9 - 3.12 |
+| 5.0 | 3.10 - 3.12 |
+| 5.1 | 3.10 - 3.13 |
+| 5.2 | 3.10 - 3.14 |
+| 6.1 | 3.12 - 3.14 |
+
+Django 6.1 support is tested against Python 3.12, 3.13, and 3.14 in CI.
 
 ---
 
@@ -278,14 +290,14 @@ storage.copy_object("uploads/photo.jpg", "backups/photo-backup.jpg")
 ┌─────────────┐      ┌─────────────────┐      ┌─────────────┐
 │   Django    │──────│  django-rustfs  │──────│    boto3    │
 │             │      │  (this package) │      │  (AWS SDK)  │
-└─────────────┘      └─────────────────┘      └──────┬──────┘
-                                                      │
-                                               HTTP/HTTPS
-                                                      │
-                                                ┌─────────┐
-                                                │  RustFS │
-                                                │  Server │
-                                                └─────────┘
+└─────────────┘      └────────┬────────┘      └──────┬──────┘
+                              │                       │
+                              └────── HTTP/HTTPS ─────┘
+                                      │
+                                ┌─────────────┐
+                                │    RustFS    │
+                                │    Server    │
+                                └─────────────┘
 ```
 
 django-rustfs uses **boto3** to communicate with RustFS. RustFS is fully S3-compatible, so the AWS SDK works out of the box - we just wrap it in a purpose-built API.
