@@ -5,8 +5,14 @@ site_author: Rian
 repo_url: https://github.com/CasualEngineerZombie/django-rustfs
 repo_name: CasualEngineerZombie/django-rustfs
 
+copyright: Copyright &copy; 2025 Rian — Apache 2.0
+
 theme:
   name: material
+  language: en
+  font:
+    text: Inter
+    code: JetBrains Mono
   palette:
     - scheme: default
       primary: deep purple
@@ -20,18 +26,36 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/database
   features:
     - navigation.instant
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.sections
     - navigation.expand
+    - navigation.path
     - navigation.top
+    - navigation.footer
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
     - content.code.annotate
-  icon:
-    repo: fontawesome/brands/github
+    - content.tabs.link
+    - toc.follow
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/CasualEngineerZombie/django-rustfs
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/django-rustfs/
+  generator: false
 
 markdown_extensions:
   - admonition
@@ -41,17 +65,30 @@ markdown_extensions:
       anchor_linenums: true
       line_spans: __span
       pygments_lang_class: true
+      pygments_style: monokai
   - pymdownx.inlinehilite
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - def_list
   - toc:
       permalink: true
 
+extra_css:
+  - stylesheets/extra.css
+
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Configuration: configuration.md
-  - API Reference: api.md
-  - Management Commands: management-commands.md
-  - Integration Testing: integration-testing.md
-  - Contributing: contributing.md
+  - Getting Started:
+      - Installation: installation.md
+      - Configuration: configuration.md
+  - Reference:
+      - API Reference: api.md
+      - Management Commands: management-commands.md
+  - Development:
+      - Integration Testing: integration-testing.md
+      - Contributing: contributing.md

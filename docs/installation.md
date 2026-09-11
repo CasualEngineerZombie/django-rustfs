@@ -1,6 +1,6 @@
 # Installation
 
-## pip install
+## Install from PyPI
 
 ```bash
 pip install django-rustfs
@@ -24,9 +24,11 @@ pip install django-rustfs
 | 5.2 | 3.10 – 3.14 |
 | 6.1 | 3.12 – 3.14 |
 
+---
+
 ## Setup
 
-### 1. Add to INSTALLED_APPS
+### Step 1 — Add to INSTALLED_APPS
 
 ```python
 # settings.py
@@ -36,7 +38,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-### 2. Configure Connection
+### Step 2 — Configure connection
 
 ```python
 # settings.py
@@ -45,36 +47,55 @@ RUSTFS_ACCESS_KEY = "your-access-key"
 RUSTFS_SECRET_KEY = "your-secret-key"
 ```
 
-### 3. Set as Default Storage
+!!! tip "Tip"
+    You only need these three settings to get started. All other settings have sensible defaults.
 
-**Django 4.2+** (recommended):
+### Step 3 — Set as default storage
 
-```python
-STORAGES = {
-    "default": {
-        "BACKEND": "django_rustfs.storage.RustFSStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django_rustfs.storage.RustFSStaticStorage",
-    },
-}
-```
+=== "Django 4.2+ (recommended)"
 
-**Django < 4.2**:
+    ```python
+    STORAGES = {
+        "default": {
+            "BACKEND": "django_rustfs.storage.RustFSStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django_rustfs.storage.RustFSStaticStorage",
+        },
+    }
+    ```
 
-```python
-DEFAULT_FILE_STORAGE = "django_rustfs.storage.RustFSStorage"
-STATICFILES_STORAGE = "django_rustfs.storage.RustFSStaticStorage"
-```
+=== "Django < 4.2"
 
-### 4. Initialize Buckets
+    ```python
+    DEFAULT_FILE_STORAGE = "django_rustfs.storage.RustFSStorage"
+    STATICFILES_STORAGE = "django_rustfs.storage.RustFSStaticStorage"
+    ```
+
+### Step 4 — Initialize buckets
 
 ```bash
 python manage.py rustfs_init_buckets
 ```
 
-### 5. Verify Everything Works
+### Step 5 — Verify everything works
 
 ```bash
 python manage.py rustfs_health
 ```
+
+!!! success "Expected output"
+    ```
+    🔍 Checking RustFS health...
+       Endpoint: http://localhost:9000
+       Bucket:   django-media
+
+      ✅ Bucket 'django-media' is accessible
+         Response time: 12.3ms
+      ✅ List operation works (0 objects visible)
+
+      🧪 Running upload/download roundtrip test...
+      ✅ Upload/download roundtrip successful
+
+    ✅ RustFS health check completed successfully!
+    ```

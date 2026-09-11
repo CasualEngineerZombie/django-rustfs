@@ -1,5 +1,7 @@
 # API Reference
 
+---
+
 ## RustFSStorage
 
 The main storage backend for media files. Implements Django's `Storage` API backed by RustFS via boto3.
@@ -10,9 +12,22 @@ from django_rustfs.storage import RustFSStorage
 storage = RustFSStorage()
 ```
 
-### Constructor Parameters
+### Constructor
 
-All `RUSTFS_*` settings can be passed as keyword arguments (without the `RUSTFS_` prefix, lowercase):
+All `RUSTFS_*` settings can be passed as keyword arguments (without the prefix, lowercase):
+
+```python
+storage = RustFSStorage(
+    endpoint_url="http://localhost:9000",
+    access_key="your-key",
+    secret_key="your-secret",
+    bucket_name="my-bucket",
+    auto_create_bucket=True,
+    default_acl="private",
+    presign_urls=True,
+    location="uploads/",
+)
+```
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -30,6 +45,8 @@ All `RUSTFS_*` settings can be passed as keyword arguments (without the `RUSTFS_
 | `location` | `str` | `""` | Key prefix |
 | `region` | `str` | `"us-east-1"` | AWS region |
 | `presign_urls` | `bool` | `True` | Generate presigned URLs |
+
+---
 
 ### Django Storage API
 
@@ -83,6 +100,7 @@ Get the URL for a file. Generates a presigned URL for private files, or a direct
 
 ```python
 url = storage.url("documents/readme.txt")
+# "http://localhost:9000/my-bucket/documents/readme.txt?X-Amz-..."
 ```
 
 #### `listdir(path="")`
@@ -94,9 +112,7 @@ directories, files = storage.listdir("media")
 # (["images", "docs"], ["root.txt"])
 ```
 
-#### `get_available_name(name, max_length=None)`
-
-Get an available file name, handling duplicates when `file_overwrite=False`.
+---
 
 ### RustFS-Specific Methods
 
@@ -106,16 +122,19 @@ Get full metadata for an object.
 
 ```python
 meta = storage.get_object_metadata("uploads/photo.jpg")
-# {
-#     "etag": "d41d8cd98f00b204e9800998ecf8427e",
-#     "last_modified": datetime(...),
-#     "content_type": "image/jpeg",
-#     "content_length": 2048,
-#     "storage_class": "STANDARD",
-#     "metadata": {},
-#     "version_id": "",
-# }
 ```
+
+Returns:
+
+| Key | Type | Description |
+|---|---|---|
+| `etag` | `str` | Object ETag |
+| `last_modified` | `datetime` | Last modified timestamp |
+| `content_type` | `str` | MIME type |
+| `content_length` | `int` | Size in bytes |
+| `storage_class` | `str` | Storage class (e.g., `"STANDARD"`) |
+| `metadata` | `dict` | Custom metadata |
+| `version_id` | `str` | Version ID |
 
 #### `copy_object(source_name, dest_name)`
 
@@ -125,7 +144,7 @@ Copy an object within the same bucket.
 storage.copy_object("uploads/photo.jpg", "backups/photo-backup.jpg")
 ```
 
-#### `get_presigned_post_url(name, expires_in=3600, fields=None, conditions=None)`
+#### `get_presigned_post_url(name, expires_in=3600)`
 
 Generate a presigned POST URL for direct browser uploads.
 
@@ -176,7 +195,6 @@ storage = RustFSStaticStorage()
 ### Usage
 
 ```python
-# Automatically used via STORAGES config
 STORAGES = {
     "staticfiles": {
         "BACKEND": "django_rustfs.storage.RustFSStaticStorage",
@@ -203,6 +221,11 @@ Base exception for all RustFS storage errors.
 
 ```python
 from django_rustfs.storage import RustFSError
+
+try:
+    storage.open("missing.txt")
+except RustFSError as e:
+    print(f"Storage error: {e}")
 ```
 
 ### RustFSBucketError
