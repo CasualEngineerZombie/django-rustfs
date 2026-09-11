@@ -233,6 +233,8 @@ public_storage = RustFSStorage(
     default_acl="public-read",
     presign_urls=False,
 )
+
+
 class UserProfile(models.Model):
     avatar = models.ImageField(storage=public_storage, upload_to="avatars/")
     documents = models.FileField(storage=private_storage, upload_to="docs/")
