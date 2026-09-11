@@ -1,6 +1,5 @@
 """Integration tests against a real RustFS S3-compatible service."""
 
-import io
 import os
 import urllib.request
 import uuid
@@ -135,7 +134,7 @@ def test_location_prefix(storage):
 def test_unicode_filename_and_path(storage):
     """Unicode object names survive a complete upload/download round trip."""
     name = "uploads/日本語/файл résumé.txt"
-    saved_name = storage.save(name, ContentFile("こんにちは RustFS".encode("utf-8")))
+    saved_name = storage.save(name, ContentFile("こんにちは RustFS".encode()))
 
     assert saved_name == name
     assert storage.exists(name) is True
