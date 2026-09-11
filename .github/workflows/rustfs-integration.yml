@@ -1,0 +1,72 @@
+name: RustFS integration tests
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+jobs:
+  integration:
+    name: RustFS / Python 3.14 / Django 6.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Start RustFS
+        run: |
+          docker run -d \
+            --name rustfs \
+            -p 9000:9000 \
+            -e RUSTFS_ACCESS_KEY=test-access-key \
+            -e RUSTFS_SECRET_KEY=test-secret-key \
+            rustfs/rustfs:latest \
+            /data
+
+      - name: Wait for RustFS
+        env:
+          RUSTFS_ACCESS_KEY: test-access-key
+          RUSTFS_SECRET_KEY: test-secret-key
+        run: |
+          python - <<'PY'
+          import time
+          import urllib.error
+          import urllib.request
+
+          url = "http://127.0.0.1:9000/"
+          deadline = time.time() + 60
+
+          while time.time() < deadline:
+              try:
+                  urllib.request.urlopen(url, timeout=2)
+                  break
+              except (urllib.error.URLError, TimeoutError):
+                  time.sleep(2)
+          else:
+              raise SystemExit("RustFS did not become ready within 60 seconds")
+          PY
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" "Django==6.1.*"
+
+      - name: Run RustFS integration tests
+        env:
+          RUSTFS_ENDPOINT: http://127.0.0.1:9000
+          RUSTFS_ACCESS_KEY: test-access-key
+          RUSTFS_SECRET_KEY: test-secret-key
+          RUSTFS_REGION: us-east-1
+        run: pytest -m integration --no-cov -v
+
+      - name: Show RustFS logs on failure
+        if: failure()
+        run: docker logs rustfs
