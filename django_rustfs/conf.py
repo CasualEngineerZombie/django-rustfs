@@ -5,10 +5,10 @@ All settings are prefixed with RUSTFS_ to avoid conflicts and provide
 a clear, RustFS-branded configuration experience.
 """
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from typing import Any
 
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 # Canonical defaults for all django-rustfs settings.
 # Keep configuration defaults here rather than duplicating them in consumers.
