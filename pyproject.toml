@@ -88,6 +88,9 @@ select = [
 ]
 ignore = ["E501"]
 
+[tool.ruff.lint.isort]
+known-third-party = ["django"]
+
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
