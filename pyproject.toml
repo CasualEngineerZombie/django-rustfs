@@ -8,8 +8,8 @@ version = "0.3.0"
 description = "Django storage backend for RustFS — an S3-compatible object storage server"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.9"
 authors = [{ name = "Rian", email = "rian@pythonist.dev" }]
+requires-python = ">=3.9"
 keywords = [
     "django",
     "rustfs",
@@ -54,7 +54,7 @@ dev = [
     "pytest-django>=4.5.0",
     "pytest-cov>=4.1.0",
     "moto>=4.2.0",
-    "ruff>=0.0.280",
+    "ruff==0.13.0",
     "mypy>=1.5.0",
     "django-stubs>=4.2.0",
 ]
