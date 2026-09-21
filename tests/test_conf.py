@@ -72,8 +72,10 @@ class TestSettingsCheck:
         [
             ("http://localhost:9000", False, "http://localhost:9000"),
             ("https://localhost:9000", True, "https://localhost:9000"),
+            ("http://localhost:8080", False, "http://localhost:8080"),
+            ("https://localhost:9443", True, "https://localhost:9443"),
             ("localhost:9000", False, "http://localhost:9000"),
-            ("localhost:9000", True, "https://localhost:9000"),
+            ("localhost:9443", True, "https://localhost:9443"),
         ],
     )
     def test_resolve_endpoint(self, endpoint, use_ssl, expected):
