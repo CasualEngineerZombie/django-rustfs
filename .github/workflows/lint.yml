@@ -28,4 +28,4 @@ jobs:
 
       - name: Check formatting with ruff
         run: |
-          ruff format --diff .
+          ruff format --check .

@@ -100,4 +100,3 @@ class TestSettingsCheck:
         """Only HTTP and HTTPS endpoint schemes are supported."""
         with pytest.raises(ImproperlyConfigured, match="must use http:// or https://"):
             resolve_endpoint("ftp://localhost:9000", False)
-
