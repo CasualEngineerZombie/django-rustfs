@@ -64,6 +64,48 @@ class TestRustFSStorageConfig:
         assert storage.secret_key == "test-secret"
         assert storage.bucket_name == "django-media"
 
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl", "expected"),
+        [
+            ("http://localhost:9000", False, "http://localhost:9000"),
+            ("https://localhost:9000", True, "https://localhost:9000"),
+            ("localhost:9000", False, "http://localhost:9000"),
+            ("localhost:9000", True, "https://localhost:9000"),
+        ],
+    )
+    def test_endpoint_and_ssl_are_resolved(self, endpoint_url, use_ssl, expected):
+        """Storage should resolve the endpoint scheme from the SSL setting."""
+        storage = RustFSStorage(
+            endpoint_url=endpoint_url,
+            use_ssl=use_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        assert storage.endpoint_url == expected
+        assert storage.use_ssl is use_ssl
+
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl"),
+        [
+            ("https://localhost:9000", False),
+            ("http://localhost:9000", True),
+        ],
+    )
+    def test_contradictory_endpoint_and_ssl_raises(self, endpoint_url, use_ssl):
+        """Storage should reject contradictory endpoint and SSL settings."""
+        with pytest.raises(
+            ImproperlyConfigured,
+            match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree",
+        ):
+            RustFSStorage(
+                endpoint_url=endpoint_url,
+                use_ssl=use_ssl,
+                access_key="test",
+                secret_key="test",
+                auto_create_bucket=False,
+            )
+
     def test_custom_bucket_name(self):
         """Storage should accept custom bucket name."""
         storage = RustFSStorage(

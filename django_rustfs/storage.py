@@ -20,6 +20,8 @@ from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import filepath_to_uri
 
+from django_rustfs.conf import DEFAULTS, Settings, resolve_endpoint
+
 
 class RustFSError(Exception):
     """Base exception for RustFS storage errors."""
@@ -103,6 +105,7 @@ class RustFSStorage(Storage):
         self.location = self._setting("LOCATION", kwargs, "", kwarg_key="location").lstrip("/")
         self.region = self._setting("REGION", kwargs, "us-east-1", kwarg_key="region")
         self.use_ssl = self._setting("USE_SSL", kwargs, False, kwarg_key="use_ssl")
+        self.endpoint_url = resolve_endpoint(self.endpoint_url, self.use_ssl)
         self.verify_ssl = self._setting("VERIFY_SSL", kwargs, True, kwarg_key="verify_ssl")
         self.max_pool_connections = self._setting(
             "MAX_POOL_CONNECTIONS", kwargs, 10, kwarg_key="max_pool_connections"
@@ -141,6 +144,8 @@ class RustFSStorage(Storage):
         key = kwarg_key or name.lower()
         if key in kwargs:
             return kwargs.pop(key)
+        if name in DEFAULTS:
+            return Settings.get(name)
         return getattr(django_settings, f"RUSTFS_{name}", default)
 
     def _validate_config(self) -> None:

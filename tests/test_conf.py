@@ -1,8 +1,10 @@
 """Tests for django-rustfs settings configuration."""
 
+import pytest
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
-from django_rustfs.conf import Settings, get_setting
+from django_rustfs.conf import Settings, get_setting, resolve_endpoint
 
 
 class TestSettingsCheck:
@@ -64,3 +66,34 @@ class TestSettingsCheck:
         assert Settings.PRESIGN_URLS is True
         assert Settings.REDUCED_REDUNDANCY is False
         assert Settings.ENCRYPTION is False
+
+    @pytest.mark.parametrize(
+        ("endpoint", "use_ssl", "expected"),
+        [
+            ("http://localhost:9000", False, "http://localhost:9000"),
+            ("https://localhost:9000", True, "https://localhost:9000"),
+            ("localhost:9000", False, "http://localhost:9000"),
+            ("localhost:9000", True, "https://localhost:9000"),
+        ],
+    )
+    def test_resolve_endpoint(self, endpoint, use_ssl, expected):
+        """Endpoint scheme should follow or match the SSL setting."""
+        assert resolve_endpoint(endpoint, use_ssl) == expected
+
+    @pytest.mark.parametrize(
+        ("endpoint", "use_ssl"),
+        [
+            ("https://localhost:9000", False),
+            ("http://localhost:9000", True),
+        ],
+    )
+    def test_resolve_endpoint_rejects_contradictory_ssl(self, endpoint, use_ssl):
+        """Explicit endpoint schemes must agree with RUSTFS_USE_SSL."""
+        with pytest.raises(ImproperlyConfigured, match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree"):
+            resolve_endpoint(endpoint, use_ssl)
+
+    def test_resolve_endpoint_rejects_unknown_scheme(self):
+        """Only HTTP and HTTPS endpoint schemes are supported."""
+        with pytest.raises(ImproperlyConfigured, match="must use http:// or https://"):
+            resolve_endpoint("ftp://localhost:9000", False)
+

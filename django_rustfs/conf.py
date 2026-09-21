@@ -6,6 +6,7 @@ a clear, RustFS-branded configuration experience.
 """
 
 from typing import Any
+from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -44,6 +45,37 @@ DEFAULTS: dict[str, Any] = {
     "REDUCED_REDUNDANCY": False,
     "ENCRYPTION": False,
 }
+
+
+def resolve_endpoint(endpoint: str, use_ssl: bool) -> str:
+    """Resolve and validate the RustFS endpoint/TLS configuration.
+
+    RUSTFS_ENDPOINT may include an http:// or https:// scheme. When a scheme
+    is present it must agree with RUSTFS_USE_SSL. When the endpoint has no
+    scheme, the scheme is derived from RUSTFS_USE_SSL.
+    """
+    endpoint = endpoint.strip().rstrip("/")
+    if not endpoint:
+        return endpoint
+
+    if "://" not in endpoint:
+        return f"{'https' if use_ssl else 'http'}://{endpoint}"
+
+    parsed = urlsplit(endpoint)
+    if parsed.scheme not in {"http", "https"}:
+        raise ImproperlyConfigured(
+            "django-rustfs: RUSTFS_ENDPOINT must use http:// or https://."
+        )
+
+    endpoint_uses_ssl = parsed.scheme == "https"
+    if endpoint_uses_ssl != bool(use_ssl):
+        expected = "https" if use_ssl else "http"
+        raise ImproperlyConfigured(
+            "django-rustfs: RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree. "
+            f"Endpoint uses {parsed.scheme} but RUSTFS_USE_SSL={use_ssl!r}; "
+            f"use an {expected} endpoint or set RUSTFS_USE_SSL accordingly."
+        )
+    return endpoint
 
 
 class Settings:

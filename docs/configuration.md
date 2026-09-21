@@ -55,11 +55,37 @@ All settings use the `RUSTFS_` prefix.
 | Setting | Default | Description |
 |---|---|---|
 | `RUSTFS_REGION` | `"us-east-1"` | AWS region name |
-| `RUSTFS_USE_SSL` | `False` | Use SSL/TLS for connections |
+| `RUSTFS_USE_SSL` | `False` | Select HTTP or HTTPS when the endpoint has no scheme; must agree with an explicit endpoint scheme |
 | `RUSTFS_VERIFY_SSL` | `True` | Verify SSL certificates |
 | `RUSTFS_MAX_POOL_CONNECTIONS` | `10` | Max boto3 connection pool size |
 | `RUSTFS_CONNECT_TIMEOUT` | `5` | Connection timeout in seconds |
 | `RUSTFS_READ_TIMEOUT` | `30` | Read timeout in seconds |
+
+### Endpoint and SSL
+
+`RUSTFS_ENDPOINT` and `RUSTFS_USE_SSL` describe the same connection protocol and must not contradict each other.
+
+- If `RUSTFS_ENDPOINT` includes `http://`, `RUSTFS_USE_SSL` must be `False`.
+- If `RUSTFS_ENDPOINT` includes `https://`, `RUSTFS_USE_SSL` must be `True`.
+- If `RUSTFS_ENDPOINT` has no scheme, `RUSTFS_USE_SSL` determines whether `http://` or `https://` is added.
+- Other endpoint schemes are rejected.
+- Contradictory configurations raise `ImproperlyConfigured` during storage initialization.
+
+For example:
+
+```python
+# HTTP
+RUSTFS_ENDPOINT = "http://localhost:9000"
+RUSTFS_USE_SSL = False
+
+# HTTPS
+RUSTFS_ENDPOINT = "https://storage.example.com:9000"
+RUSTFS_USE_SSL = True
+
+# Scheme omitted: HTTPS is derived from RUSTFS_USE_SSL
+RUSTFS_ENDPOINT = "storage.example.com:9000"
+RUSTFS_USE_SSL = True
+```
 
 ---
 
