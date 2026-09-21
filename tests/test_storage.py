@@ -145,6 +145,24 @@ class TestRustFSStorageConfig:
         assert config.connect_timeout == 7
         assert config.read_timeout == 42
 
+    @pytest.mark.parametrize("verify_ssl", [True, False])
+    def test_verify_ssl_is_passed_to_boto3(self, verify_ssl):
+        """VERIFY_SSL must control botocore certificate verification."""
+        storage = RustFSStorage(
+            endpoint_url="https://localhost:9443",
+            use_ssl=True,
+            verify_ssl=verify_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+
+        with patch("django_rustfs.storage.boto3.client") as boto3_client:
+            boto3_client.return_value = MagicMock()
+            storage.client
+
+        assert boto3_client.call_args.kwargs["verify"] is verify_ssl
+
     def test_custom_bucket_name(self):
         """Storage should accept custom bucket name."""
         storage = RustFSStorage(
