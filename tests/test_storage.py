@@ -64,6 +64,123 @@ class TestRustFSStorageConfig:
         assert storage.secret_key == "test-secret"
         assert storage.bucket_name == "django-media"
 
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl", "expected"),
+        [
+            ("http://localhost:9000", False, "http://localhost:9000"),
+            ("https://localhost:9000", True, "https://localhost:9000"),
+            ("http://localhost:8080", False, "http://localhost:8080"),
+            ("https://localhost:9443", True, "https://localhost:9443"),
+            ("localhost:9000", False, "http://localhost:9000"),
+            ("localhost:9443", True, "https://localhost:9443"),
+        ],
+    )
+    def test_endpoint_and_ssl_are_resolved(self, endpoint_url, use_ssl, expected):
+        """Storage should resolve the endpoint scheme from the SSL setting."""
+        storage = RustFSStorage(
+            endpoint_url=endpoint_url,
+            use_ssl=use_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        assert storage.endpoint_url == expected
+        assert storage.use_ssl is use_ssl
+
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl"),
+        [
+            ("https://localhost:9000", False),
+            ("http://localhost:9000", True),
+        ],
+    )
+    def test_contradictory_endpoint_and_ssl_raises(self, endpoint_url, use_ssl):
+        """Storage should reject contradictory endpoint and SSL settings."""
+        with pytest.raises(
+            ImproperlyConfigured,
+            match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree",
+        ):
+            RustFSStorage(
+                endpoint_url=endpoint_url,
+                use_ssl=use_ssl,
+                access_key="test",
+                secret_key="test",
+                auto_create_bucket=False,
+            )
+
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl", "verify_ssl"),
+        [
+            ("http://localhost:9000", False, True),
+            ("https://localhost:9443", True, True),
+            ("https://localhost:9443", True, False),
+        ],
+    )
+    def test_boto3_client_receives_endpoint_and_tls_settings(
+        self, endpoint_url, use_ssl, verify_ssl
+    ):
+        """Boto3 should receive the resolved endpoint and TLS settings."""
+        storage = RustFSStorage(
+            endpoint_url=endpoint_url,
+            use_ssl=use_ssl,
+            verify_ssl=verify_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+            connect_timeout=7,
+            read_timeout=42,
+        )
+        with patch("django_rustfs.storage.boto3.client") as boto3_client:
+            boto3_client.return_value = MagicMock()
+            client = storage.client
+
+        assert client is boto3_client.return_value
+        kwargs = boto3_client.call_args.kwargs
+        assert kwargs["endpoint_url"] == endpoint_url
+        assert kwargs["use_ssl"] is use_ssl
+        assert kwargs["verify"] is verify_ssl
+        assert kwargs["region_name"] == storage.region
+        config = kwargs["config"]
+        assert config.max_pool_connections == storage.max_pool_connections
+        assert config.connect_timeout == 7
+        assert config.read_timeout == 42
+
+    @pytest.mark.parametrize("verify_ssl", [True, False])
+    def test_verify_ssl_is_passed_to_boto3(self, verify_ssl):
+        """VERIFY_SSL must control botocore certificate verification."""
+        storage = RustFSStorage(
+            endpoint_url="https://localhost:9443",
+            use_ssl=True,
+            verify_ssl=verify_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+
+        with patch("django_rustfs.storage.boto3.client") as boto3_client:
+            boto3_client.return_value = MagicMock()
+            assert storage.client is boto3_client.return_value
+
+        assert boto3_client.call_args.kwargs["verify"] is verify_ssl
+
+    @pytest.mark.parametrize(
+        ("use_ssl", "secure_urls", "expected_scheme"),
+        [(False, True, "http"), (True, False, "https")],
+    )
+    def test_direct_urls_follow_connection_protocol(self, use_ssl, secure_urls, expected_scheme):
+        """Direct URLs should follow the canonical connection protocol."""
+        storage = RustFSStorage(
+            endpoint_url="https://localhost:9443" if use_ssl else "http://localhost:8080",
+            use_ssl=use_ssl,
+            secure_urls=secure_urls,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage.presign_urls = False
+        url = storage.url("photo.jpg")
+        assert url.startswith(f"{expected_scheme}://localhost:")
+
     def test_custom_bucket_name(self):
         """Storage should accept custom bucket name."""
         storage = RustFSStorage(
@@ -177,19 +294,22 @@ class TestRustFSStorageOperations:
         storage.client.head_object.return_value = {"ContentLength": 1024}
         assert storage.size("photo.jpg") == 1024
 
-    def test_url_with_custom_domain(self, storage):
-        """Test URL generation with custom domain."""
+    @pytest.mark.parametrize(
+        ("use_ssl", "secure_urls", "expected_scheme"),
+        [(False, True, "http"), (True, False, "https")],
+    )
+    def test_url_with_custom_domain_follows_connection_protocol(
+        self, storage, use_ssl, secure_urls, expected_scheme
+    ):
+        """Custom-domain URLs should follow the canonical connection protocol."""
+        storage.endpoint_url = "https://localhost:9443" if use_ssl else "http://localhost:8080"
+        storage.use_ssl = use_ssl
+        storage.secure_urls = secure_urls
         storage.custom_domain = "cdn.example.com"
-        storage.secure_urls = True
-        url = storage.url("photo.jpg")
-        assert url == "https://cdn.example.com/photo.jpg"
 
-    def test_url_with_custom_domain_insecure(self, storage):
-        """Test URL generation with custom domain and HTTP."""
-        storage.custom_domain = "cdn.example.com"
-        storage.secure_urls = False
         url = storage.url("photo.jpg")
-        assert url == "http://cdn.example.com/photo.jpg"
+
+        assert url == f"{expected_scheme}://cdn.example.com/photo.jpg"
 
     def test_url_presigned(self, storage):
         """Test presigned URL generation."""
