@@ -159,9 +159,27 @@ class TestRustFSStorageConfig:
 
         with patch("django_rustfs.storage.boto3.client") as boto3_client:
             boto3_client.return_value = MagicMock()
-            storage.client
+            assert storage.client is boto3_client.return_value
 
         assert boto3_client.call_args.kwargs["verify"] is verify_ssl
+
+    @pytest.mark.parametrize(
+        ("use_ssl", "secure_urls", "expected_scheme"),
+        [(False, True, "http"), (True, False, "https")],
+    )
+    def test_direct_urls_follow_connection_protocol(self, use_ssl, secure_urls, expected_scheme):
+        """Direct URLs should follow the canonical connection protocol."""
+        storage = RustFSStorage(
+            endpoint_url="https://localhost:9443" if use_ssl else "http://localhost:8080",
+            use_ssl=use_ssl,
+            secure_urls=secure_urls,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+        )
+        storage.presign_urls = False
+        url = storage.url("photo.jpg")
+        assert url.startswith(f"{expected_scheme}://localhost:")
 
     def test_custom_bucket_name(self):
         """Storage should accept custom bucket name."""

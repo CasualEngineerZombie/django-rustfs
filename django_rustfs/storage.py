@@ -370,7 +370,7 @@ class RustFSStorage(Storage):
 
         # If custom domain is set, use it for direct URLs
         if self.custom_domain:
-            scheme = "https" if self.secure_urls else "http"
+            scheme = "https" if self.use_ssl else "http"
             domain = self.custom_domain.rstrip("/")
             return f"{scheme}://{domain}/{filepath_to_uri(key)}"
 
@@ -388,7 +388,7 @@ class RustFSStorage(Storage):
                 raise RustFSError(f"Failed to generate URL for '{name}': {e}") from e
 
         # Direct URL via endpoint
-        scheme = "https" if self.secure_urls else "http"
+        scheme = "https" if self.use_ssl else "http"
         endpoint = self.endpoint_url.rstrip("/")
         return (
             f"{scheme}://{endpoint.split('://', 1)[-1]}/{self.bucket_name}/{filepath_to_uri(key)}"
