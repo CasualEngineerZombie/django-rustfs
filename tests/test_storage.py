@@ -294,19 +294,24 @@ class TestRustFSStorageOperations:
         storage.client.head_object.return_value = {"ContentLength": 1024}
         assert storage.size("photo.jpg") == 1024
 
-    def test_url_with_custom_domain(self, storage):
-        """Test URL generation with custom domain."""
+    @pytest.mark.parametrize(
+        ("use_ssl", "secure_urls", "expected_scheme"),
+        [(False, True, "http"), (True, False, "https")],
+    )
+    def test_url_with_custom_domain_follows_connection_protocol(
+        self, storage, use_ssl, secure_urls, expected_scheme
+    ):
+        """Custom-domain URLs should follow the canonical connection protocol."""
+        storage.endpoint_url = (
+            "https://localhost:9443" if use_ssl else "http://localhost:8080"
+        )
+        storage.use_ssl = use_ssl
+        storage.secure_urls = secure_urls
         storage.custom_domain = "cdn.example.com"
-        storage.secure_urls = True
-        url = storage.url("photo.jpg")
-        assert url == "https://cdn.example.com/photo.jpg"
 
-    def test_url_with_custom_domain_insecure(self, storage):
-        """Test URL generation with custom domain and HTTP."""
-        storage.custom_domain = "cdn.example.com"
-        storage.secure_urls = False
         url = storage.url("photo.jpg")
-        assert url == "http://cdn.example.com/photo.jpg"
+
+        assert url == f"{expected_scheme}://cdn.example.com/photo.jpg"
 
     def test_url_presigned(self, storage):
         """Test presigned URL generation."""
