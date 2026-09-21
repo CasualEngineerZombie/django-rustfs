@@ -63,9 +63,7 @@ def resolve_endpoint(endpoint: str, use_ssl: bool) -> str:
 
     parsed = urlsplit(endpoint)
     if parsed.scheme not in {"http", "https"}:
-        raise ImproperlyConfigured(
-            "django-rustfs: RUSTFS_ENDPOINT must use http:// or https://."
-        )
+        raise ImproperlyConfigured("django-rustfs: RUSTFS_ENDPOINT must use http:// or https://.")
 
     endpoint_uses_ssl = parsed.scheme == "https"
     if endpoint_uses_ssl != bool(use_ssl):

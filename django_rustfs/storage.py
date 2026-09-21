@@ -114,9 +114,7 @@ class RustFSStorage(Storage):
         self.connect_timeout = self._setting(
             "CONNECT_TIMEOUT", kwargs, 5, kwarg_key="connect_timeout"
         )
-        self.read_timeout = self._setting(
-            "READ_TIMEOUT", kwargs, 30, kwarg_key="read_timeout"
-        )
+        self.read_timeout = self._setting("READ_TIMEOUT", kwargs, 30, kwarg_key="read_timeout")
 
         # Validate required settings
         self._validate_config()

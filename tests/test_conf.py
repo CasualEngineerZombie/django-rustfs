@@ -91,7 +91,9 @@ class TestSettingsCheck:
     )
     def test_resolve_endpoint_rejects_contradictory_ssl(self, endpoint, use_ssl):
         """Explicit endpoint schemes must agree with RUSTFS_USE_SSL."""
-        with pytest.raises(ImproperlyConfigured, match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree"):
+        with pytest.raises(
+            ImproperlyConfigured, match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree"
+        ):
             resolve_endpoint(endpoint, use_ssl)
 
     def test_resolve_endpoint_rejects_unknown_scheme(self):

@@ -302,9 +302,7 @@ class TestRustFSStorageOperations:
         self, storage, use_ssl, secure_urls, expected_scheme
     ):
         """Custom-domain URLs should follow the canonical connection protocol."""
-        storage.endpoint_url = (
-            "https://localhost:9443" if use_ssl else "http://localhost:8080"
-        )
+        storage.endpoint_url = "https://localhost:9443" if use_ssl else "http://localhost:8080"
         storage.use_ssl = use_ssl
         storage.secure_urls = secure_urls
         storage.custom_domain = "cdn.example.com"
