@@ -50,9 +50,7 @@ def test_resolve_endpoint_rejects_protocol_disagreement(endpoint, use_ssl):
         (True, False),
     ],
 )
-def test_client_configuration_matches_canonical_protocol_and_tls(
-    use_ssl, verify_ssl
-):
+def test_client_configuration_matches_canonical_protocol_and_tls(use_ssl, verify_ssl):
     """boto3 receives the canonical endpoint, protocol, and TLS verification."""
     endpoint = "localhost:8080" if not use_ssl else "localhost:9443"
 
