@@ -66,7 +66,7 @@ def test_client_configuration_matches_canonical_protocol_and_tls(
             auto_create_bucket=False,
         )
 
-        storage.client
+        assert storage.client is not None
 
     boto3_client.assert_called_once()
     kwargs = boto3_client.call_args.kwargs
@@ -99,7 +99,7 @@ def test_client_preserves_explicit_ports_and_tls(
             verify_ssl=verify_ssl,
             auto_create_bucket=False,
         )
-        storage.client
+        assert storage.client is not None
 
     kwargs = boto3_client.call_args.kwargs
     assert kwargs["endpoint_url"] == expected_endpoint
@@ -118,7 +118,7 @@ def test_storage_client_uses_canonical_settings_layer():
     """Storage and boto3 configuration are derived from Settings."""
     with patch("django_rustfs.storage.boto3.client") as boto3_client:
         storage = RustFSStorage(auto_create_bucket=False)
-        storage.client
+        assert storage.client is not None
 
     assert storage.endpoint_url == "https://rustfs.internal:9443"
     assert storage.use_ssl is True
