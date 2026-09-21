@@ -111,6 +111,12 @@ class RustFSStorage(Storage):
             "MAX_POOL_CONNECTIONS", kwargs, 10, kwarg_key="max_pool_connections"
         )
         self.presign_urls = self._setting("PRESIGN_URLS", kwargs, True, kwarg_key="presign_urls")
+        self.connect_timeout = self._setting(
+            "CONNECT_TIMEOUT", kwargs, 5, kwarg_key="connect_timeout"
+        )
+        self.read_timeout = self._setting(
+            "READ_TIMEOUT", kwargs, 30, kwarg_key="read_timeout"
+        )
 
         # Validate required settings
         self._validate_config()
@@ -170,8 +176,8 @@ class RustFSStorage(Storage):
         if self._client is None:
             config = botocore.config.Config(
                 max_pool_connections=self.max_pool_connections,
-                connect_timeout=5,
-                read_timeout=30,
+                connect_timeout=self.connect_timeout,
+                read_timeout=self.read_timeout,
             )
             self._client = boto3.client(
                 "s3",
