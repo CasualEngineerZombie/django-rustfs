@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
 from django_rustfs.conf import resolve_endpoint
@@ -34,7 +35,9 @@ def test_resolve_endpoint_protocol_and_ports(endpoint, use_ssl, expected):
 )
 def test_resolve_endpoint_rejects_protocol_disagreement(endpoint, use_ssl):
     """Explicit endpoint schemes cannot silently disagree with USE_SSL."""
-    with pytest.raises(Exception, match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree"):
+    with pytest.raises(
+        ImproperlyConfigured, match="RUSTFS_ENDPOINT and RUSTFS_USE_SSL disagree"
+    ):
         resolve_endpoint(endpoint, use_ssl)
 
 
@@ -67,9 +70,7 @@ def test_client_configuration_matches_canonical_protocol_and_tls(
 
     boto3_client.assert_called_once()
     kwargs = boto3_client.call_args.kwargs
-    expected_endpoint = (
-        f"{'https' if use_ssl else 'http'}://{endpoint}"
-    )
+    expected_endpoint = f"{'https' if use_ssl else 'http'}://{endpoint}"
 
     assert kwargs["endpoint_url"] == expected_endpoint
     assert kwargs["use_ssl"] is use_ssl
