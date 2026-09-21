@@ -106,6 +106,43 @@ class TestRustFSStorageConfig:
                 auto_create_bucket=False,
             )
 
+    @pytest.mark.parametrize(
+        ("endpoint_url", "use_ssl", "verify_ssl"),
+        [
+            ("http://localhost:9000", False, True),
+            ("https://localhost:9443", True, True),
+            ("https://localhost:9443", True, False),
+        ],
+    )
+    def test_boto3_client_receives_endpoint_and_tls_settings(
+        self, endpoint_url, use_ssl, verify_ssl
+    ):
+        """Boto3 should receive the resolved endpoint and TLS settings."""
+        storage = RustFSStorage(
+            endpoint_url=endpoint_url,
+            use_ssl=use_ssl,
+            verify_ssl=verify_ssl,
+            access_key="test",
+            secret_key="test",
+            auto_create_bucket=False,
+            connect_timeout=7,
+            read_timeout=42,
+        )
+        with patch("django_rustfs.storage.boto3.client") as boto3_client:
+            boto3_client.return_value = MagicMock()
+            client = storage.client
+
+        assert client is boto3_client.return_value
+        kwargs = boto3_client.call_args.kwargs
+        assert kwargs["endpoint_url"] == endpoint_url
+        assert kwargs["use_ssl"] is use_ssl
+        assert kwargs["verify"] is verify_ssl
+        assert kwargs["region_name"] == storage.region
+        config = kwargs["config"]
+        assert config.max_pool_connections == storage.max_pool_connections
+        assert config.connect_timeout == 7
+        assert config.read_timeout == 42
+
     def test_custom_bucket_name(self):
         """Storage should accept custom bucket name."""
         storage = RustFSStorage(
